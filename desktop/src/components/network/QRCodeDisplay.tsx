@@ -13,11 +13,11 @@ export default function QRCodeDisplay({ text }: QRCodeDisplayProps) {
         <QRCode
           value={text}
           logoImage={logoRaw}
-          // removeQrCodeBehindLogo={true}
+          removeQrCodeBehindLogo={true}
           logoPaddingStyle="circle"
           logoPadding={1}
           qrStyle="dots"
-          logoWidth={150}
+          logoWidth={80}
           eyeRadius={150}
           eyeColor={THEME_COLOR}
           size={350}
