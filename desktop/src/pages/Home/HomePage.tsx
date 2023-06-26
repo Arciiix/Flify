@@ -28,10 +28,13 @@ export default function HomePage() {
       <span className="text-slate-200">or with manual connection</span>
       <NetworkInfo />
 
-      <div className="text-4xl m-8 text-center flex gap-2 items-center">
-        Scan the QR code with the <Logo isSmall width={38} />
-        <b className="text-flify font-[ArialRoundedBold,Roboto]">Flify</b> app
-        to start.
+      <div className="text-4xl m-8 text-center flex flex-col lg:flex-row gap-2 items-center">
+        Scan the QR code with the{" "}
+        <div className="flex gap-2 items-center justify-center">
+          <Logo isSmall width={38} />
+          <b className="text-flify font-[ArialRoundedBold,Roboto]">Flify</b>
+        </div>{" "}
+        app to start.
       </div>
 
       <MadeWithHeart />
