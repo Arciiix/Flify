@@ -18,7 +18,11 @@ export default function Logo({
   width = 100,
 }: LogoProps) {
   return (
-    <div className={`${isAnimated ? "logo-animated" : ""} logo-wrapper`}>
+    <div
+      className={`${
+        isAnimated ? "logo-animated" : ""
+      } logo-wrapper flex [&>*]:flex-shrink-0`}
+    >
       {isSmall ? (
         <LogoSvg width={width} />
       ) : (
