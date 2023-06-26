@@ -79,6 +79,7 @@ class _ScanQrCodeState extends State<ScanQrCode> {
               }
               return;
             }
+            // Format: Flify/<ip>:<port>/<hostname>
             if (rawValue.startsWith("Flify/")) {
               String ip, port, name;
               List<String> strings =

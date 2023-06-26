@@ -1,0 +1,21 @@
+.explaination {
+    position: relative;
+    display: block;
+margin-bottom: 40px;
+}
+
+.explaination::after  {
+    content: attr(data-explaination);
+    position: absolute;
+    top: 70%;
+    left: -5px;
+    width: calc(100% + 10px);
+    height: 50%;
+    border: 3px solid var(--explaination-color);
+    border-radius: 0px 0px 8px 8px;
+    border-top: none;
+    line-height: calc(120% + 40px);
+    vertical-align: bottom;
+    font-size: 0.7em;
+    color: var(--explaination-color)
+}
