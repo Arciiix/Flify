@@ -4,6 +4,7 @@ import 'package:flify/components/ui/Logo.dart';
 import 'package:flutter/material.dart';
 
 import '../components/connect/ManualConnect.dart';
+import '../components/ui/AnimatedLogo.dart';
 
 class HomeScreen extends StatelessWidget {
   final String? ip;
@@ -22,7 +23,11 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Logo(
+            // Logo(
+            //   width: MediaQuery.of(context).size.width * 0.8,
+            //   isFullSize: true,
+            // ),
+            AnimatedLogo(
               width: MediaQuery.of(context).size.width * 0.8,
               isFullSize: true,
             ),
