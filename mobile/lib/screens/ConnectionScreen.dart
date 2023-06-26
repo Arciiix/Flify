@@ -5,6 +5,7 @@ import 'package:flify/types/recent_device.dart';
 import 'package:flutter/material.dart';
 import "package:go_router/go_router.dart";
 import 'package:isar/isar.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../services/isar_service.dart';
 
@@ -20,7 +21,10 @@ class ConnectionScreen extends StatefulWidget {
 }
 
 class _ConnectionScreenState extends State<ConnectionScreen> {
-  bool _isConnecting = true;
+  String? _loadingState = "Loading...";
+  late final IO.Socket socket;
+
+  bool _isError = false;
 
   void validateIPAndPort() {
     // Check if ip and port are valid
@@ -29,6 +33,57 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
           const SnackBar(content: Text("Wrong IP or port provided!")));
       context.go("/");
     }
+  }
+
+  void initSocketConnection() {
+    // TODO: Think about migrating to HTTPS
+    socket = IO.io('http://${widget.ip}:${widget.port}');
+    setState(() {
+      _loadingState = "Waiting for connection...";
+    });
+    socket.onConnect((_) {
+      if (!mounted) return;
+
+      print("Successfully connnected to the socket!");
+      socket.emit("hello");
+      setState(() {
+        _loadingState = "Waiting for initial message...";
+      });
+    });
+    socket.onConnectError((data) {
+      if (!mounted) return;
+
+      print("Connection error!");
+      print(data);
+      setState(() {
+        _loadingState = "Error: ${data?.toString() ?? "unknown"}";
+        _isError = true;
+      });
+    });
+    socket.onConnectTimeout((data) {
+      if (!mounted) return;
+
+      print("Connection timeout!");
+      print(data);
+      setState(() {
+        _loadingState = "Error: connection timeout";
+        _isError = true;
+      });
+    });
+    socket.onDisconnect((data) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Disconnected from the server")));
+      context.go("/");
+    });
+
+    // A reply to "hello" event send onConnect
+    // TODO: Receive some metadata
+    socket.on("world", (_) {
+      setState(() {
+        _loadingState = null;
+      });
+    });
   }
 
   Future<void> initConnection() async {
@@ -52,11 +107,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       print("Updated db with recent device");
     });
 
-    // TODO: Add connection logic
-
-    setState(() {
-      _isConnecting = false;
-    });
+    // Try to connect to the server
+    initSocketConnection();
   }
 
   @override
@@ -68,8 +120,11 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isConnecting) {
-      return Loading();
+    if (_loadingState != null) {
+      return Loading(
+        loadingText: _loadingState ?? "Loading...",
+        showGoHomeButton: _isError,
+      );
     } else {
       return Scaffold(body: Column(children: [AnimatedLogoTransition()]));
     }
