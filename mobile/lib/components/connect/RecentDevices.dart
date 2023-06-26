@@ -1,6 +1,7 @@
 import 'package:flify/services/isar_service.dart';
 import 'package:flify/types/recent_device.dart';
 import 'package:flutter/material.dart';
+import "package:go_router/go_router.dart";
 
 import 'package:isar/isar.dart';
 
@@ -61,6 +62,11 @@ class _RecentDevicesState extends State<RecentDevices> {
     }
   }
 
+  void connectToDevice(RecentDevice device) {
+    context.push(
+        "/connection?ip=${device.ip}&port=${device.port}&name=${device.name}");
+  }
+
   @override
   void initState() {
     super.initState();
@@ -83,7 +89,7 @@ class _RecentDevicesState extends State<RecentDevices> {
                           label: Text("${e.name} (${e.ip.toString()})"),
                           onDeleted: () => deleteDevice(e),
                           onPressed: () {
-                            print("TODO: Connect to device");
+                            connectToDevice(e);
                           },
                         ),
                       ))

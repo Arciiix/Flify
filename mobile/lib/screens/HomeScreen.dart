@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 
 import '../components/connect/ManualConnect.dart';
 import '../components/ui/AnimatedLogo.dart';
+import '../components/ui/AnimatedLogoTransition.dart';
 
 class HomeScreen extends StatelessWidget {
   final String? ip;
   final String? port;
+  final String? name;
 
-  const HomeScreen({super.key, this.ip, this.port});
+  const HomeScreen({super.key, this.ip, this.port, this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +29,7 @@ class HomeScreen extends StatelessWidget {
             //   width: MediaQuery.of(context).size.width * 0.8,
             //   isFullSize: true,
             // ),
-            AnimatedLogo(
-              width: MediaQuery.of(context).size.width * 0.8,
-              isFullSize: true,
-            ),
+            const AnimatedLogoTransition(),
             Text("Connect",
                 style: TextStyle(fontSize: 48, color: primaryColor)),
             CurrentNetworkInfo(),
@@ -38,7 +37,7 @@ class HomeScreen extends StatelessWidget {
                 style: TextStyle(
                     color: primaryColor.withOpacity(0.6), fontSize: 19)),
             const RecentDevices(),
-            ManualConnect(ip: ip, port: port),
+            ManualConnect(ip: ip, port: port, name: name),
           ],
         ),
       )),

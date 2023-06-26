@@ -80,12 +80,17 @@ class _ScanQrCodeState extends State<ScanQrCode> {
               return;
             }
             if (rawValue.startsWith("Flify/")) {
-              String ip, port;
-              [ip, port] = rawValue.replaceFirst("Flify/", "").split(":");
+              String ip, port, name;
+              List<String> strings =
+                  rawValue.replaceFirst("Flify/", "").split("/");
+              [ip, port] = strings[0].split(":");
+              name = strings.length > 1 ? strings[1] : "My Flify device";
+
               if (isIPv4Valid(ip) && isPortValid(port)) {
                 // Success - navigate back with the data
-                // context.pop([ip, port]);
-                context.go("/", extra: HomeScreenState(ip: ip, port: port));
+                // context.pop([ip, port, name]);
+                context.go("/",
+                    extra: HomeScreenState(ip: ip, port: port, name: name));
               } else {
                 // Wrong format
                 if (!_isSnackbarActive) {
