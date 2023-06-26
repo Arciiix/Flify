@@ -1,14 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Logo from "./components/ui/Logo/Logo";
 
-function App() {
-  const [count, setCount] = useState(0);
-  return (
-    <div className="App">
-      <span>Hello Flify!</span>
+import { RecoilRoot, useRecoilState } from "recoil";
+import { connection } from "./state/connection/connection.atom";
+import { getConnectionInfo } from "./services/connection/getConnectionInfo";
+import { RouterProvider } from "react-router-dom";
+import router from "./router";
+import Init from "./components/init/Init";
 
-      <Logo isAnimated width={150} />
-    </div>
+function App() {
+  return (
+    <RecoilRoot>
+      <div className="App">
+        <Init>
+          <RouterProvider router={router} />
+        </Init>
+      </div>
+    </RecoilRoot>
   );
 }
 

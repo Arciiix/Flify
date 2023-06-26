@@ -1,6 +1,7 @@
 import { app, BrowserWindow, shell, ipcMain } from "electron";
 import { release } from "node:os";
 import { join } from "node:path";
+import handleInternalAPI from "./services/api";
 
 // The built directory structure
 //
@@ -42,7 +43,7 @@ const indexHtml = join(process.env.DIST, "index.html");
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: "Main window",
+    title: "Flify",
     icon: join(process.env.PUBLIC, "icons", "favicon.ico"),
     webPreferences: {
       preload,
@@ -73,6 +74,8 @@ async function createWindow() {
     if (url.startsWith("https:")) shell.openExternal(url);
     return { action: "deny" };
   });
+
+  handleInternalAPI();
 }
 
 app.whenReady().then(createWindow);
