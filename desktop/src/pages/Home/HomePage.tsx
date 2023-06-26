@@ -6,6 +6,7 @@ import NetworkInfo from "@/components/network/NetworkInfo";
 import QRCodeDisplay from "@/components/network/QRCodeDisplay";
 import { connection } from "@/state/connection/connection.atom";
 import { useRecoilState } from "recoil";
+import MadeWithHeart from "@/components/ui/MadeWithHeart/MadeWithHeart";
 
 export default function HomePage() {
   const network = useRecoilState(connection);
@@ -32,6 +33,8 @@ export default function HomePage() {
         <b className="text-flify font-[ArialRoundedBold,Roboto]">Flify</b> app
         to start.
       </div>
+
+      <MadeWithHeart />
     </div>
   );
 }
