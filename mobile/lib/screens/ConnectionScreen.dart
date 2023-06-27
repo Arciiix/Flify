@@ -24,8 +24,12 @@ class ConnectionScreen extends StatefulWidget {
 }
 
 class _ConnectionScreenState extends State<ConnectionScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   String? _loadingState = "Loading...";
   late final IO.Socket socket;
+
+  late String remoteDeviceName;
 
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
@@ -63,10 +67,31 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     return Metadata(selfIp: selfIp, deviceName: name);
   }
 
+  Future<void> updateName(String newName) async {
+    RecentDevice recentDevice = (await IsarService.db.recentDevices
+        .filter()
+        .ipEqualTo(widget.ip)
+        .and()
+        .portEqualTo(int.parse(widget.port))
+        .findFirst())!;
+
+    recentDevice.name = newName;
+
+    await IsarService.db.writeTxn(() async {
+      await IsarService.db.recentDevices.put(recentDevice);
+      print("Updated this device's name in the db");
+    });
+
+    setState(() {
+      remoteDeviceName = newName;
+    });
+  }
+
   void initSocketConnection(Metadata metadata) {
     // TODO: Think about migrating to HTTPS
     socket = IO.io('http://${widget.ip}:${widget.port}', <String, dynamic>{
       'transports': ['websocket'],
+      'forceNew': true
     });
     setState(() {
       _loadingState = "Waiting for connection...";
@@ -103,13 +128,26 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     });
     socket.onDisconnect((data) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Disconnected from the server")));
-      context.go("/");
+      if (_scaffoldKey.currentContext != null) {
+        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+            const SnackBar(content: Text("Disconnected from the server")));
+        _scaffoldKey.currentContext!.go(
+          "/",
+        );
+      }
     });
 
     // A reply to "hello" event send onConnect
-    socket.on("world", (_) {
+    socket.on("world", (data) {
+      if (data?['hostname'] != null && data['hostname'] != remoteDeviceName) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              'Remote host name "${data['hostname']}" is different from the device name "$remoteDeviceName"'),
+          action: SnackBarAction(
+              label: "Update", onPressed: () => updateName(data['hostname'])),
+        ));
+      }
+
       setState(() {
         _loadingState = null;
       });
@@ -128,7 +166,9 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
             .portEqualTo(int.parse(widget.port))
             .findFirst() ??
         RecentDevice(
-            ip: widget.ip, port: int.parse(widget.port), name: widget.name);
+            ip: widget.ip,
+            port: int.parse(widget.port),
+            name: remoteDeviceName);
 
     recentDevice.lastConnectionDate = DateTime.now();
 
@@ -145,6 +185,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   @override
   void initState() {
     super.initState();
+    remoteDeviceName = widget.name;
 
     WidgetsBinding.instance.addPostFrameCallback((_) => initConnection());
   }
@@ -157,7 +198,18 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
         showGoHomeButton: _isError,
       );
     } else {
-      return Scaffold(body: Column(children: [AnimatedLogoTransition()]));
+      return Scaffold(
+          key: _scaffoldKey,
+          body: Column(children: [AnimatedLogoTransition()]));
     }
+  }
+
+  @override
+  void dispose() {
+    print("DISPOSE! Disconnect from server");
+    socket.disconnect();
+    socket.dispose();
+
+    super.dispose();
   }
 }

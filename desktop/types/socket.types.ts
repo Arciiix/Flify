@@ -10,3 +10,7 @@ export interface Metadata {
   selfIp?: string;
   deviceName: string;
 }
+
+export interface WorldPayload {
+  hostname: string;
+}

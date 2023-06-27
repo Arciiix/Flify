@@ -70,7 +70,6 @@ class _RecentDevicesState extends State<RecentDevices> {
   @override
   void initState() {
     super.initState();
-
     getRecentDevices();
   }
 
