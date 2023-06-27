@@ -17,7 +17,7 @@ class RecentDevicesState extends ConsumerState<RecentDevices> {
   late final Isar db;
 
   Future<void> deleteDevice(RecentDevice device) async {
-    bool answer = await showDialog(
+    bool? answer = await showDialog(
         context: context,
         builder: (BuildContext ctx) {
           return AlertDialog(
@@ -40,7 +40,7 @@ class RecentDevicesState extends ConsumerState<RecentDevices> {
           );
         });
 
-    if (answer) {
+    if (answer == true) {
       await db.writeTxn(() async {
         await db.recentDevices.delete(device.id);
       });
@@ -53,13 +53,58 @@ class RecentDevicesState extends ConsumerState<RecentDevices> {
         "/connection?ip=${device.ip}&port=${device.port}&name=${device.name}");
   }
 
+  Future<void> changeName(RecentDevice device) async {
+    TextEditingController _newNameController = TextEditingController()
+      ..text = device.name;
+
+    bool? shouldChange = await showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            title: const Text('Change device name'),
+            content: TextField(
+              controller: _newNameController,
+              decoration: InputDecoration(
+                  hintText: "My Flify device",
+                  suffix: IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: () => _newNameController.text = device.name,
+                  )),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  child: const Text('Cancel')),
+              TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Change')),
+            ],
+          );
+        });
+
+    if (shouldChange == true) {
+      device.name = _newNameController.text;
+      await db.writeTxn(() async {
+        await db.recentDevices.put(device);
+      });
+
+      ref.refresh(recentDevicesProvider);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
 
     db = ref.read(isarProvider);
 
-    ref.refresh(recentDevicesProvider);
+    // If there's a need to re-fetch the recent devices:
+    // ref.refresh(recentDevicesProvider);
   }
 
   @override
@@ -76,13 +121,16 @@ class RecentDevicesState extends ConsumerState<RecentDevices> {
                         ? items
                             .map((e) => Padding(
                                   padding: const EdgeInsets.all(4.0),
-                                  child: RawChip(
-                                    label:
-                                        Text("${e.name} (${e.ip.toString()})"),
-                                    onDeleted: () => deleteDevice(e),
-                                    onPressed: () {
-                                      connectToDevice(e);
-                                    },
+                                  child: InkWell(
+                                    onLongPress: () => changeName(e),
+                                    child: RawChip(
+                                      label: Text(
+                                          "${e.name} (${e.ip.toString()})"),
+                                      onDeleted: () => deleteDevice(e),
+                                      onPressed: () {
+                                        connectToDevice(e);
+                                      },
+                                    ),
                                   ),
                                 ))
                             .toList()
