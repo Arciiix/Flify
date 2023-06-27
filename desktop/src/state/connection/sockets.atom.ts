@@ -8,7 +8,7 @@ export const sockets = atom<Client[]>({
   effects: [
     ({ onSet }) => {
       onSet((newValue) => {
-        console.log("ON SET", newValue);
+        console.log("Socket list updated", newValue);
       });
     },
   ],
