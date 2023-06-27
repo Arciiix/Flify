@@ -2,6 +2,7 @@ import { app, BrowserWindow, shell, ipcMain } from "electron";
 import { release } from "node:os";
 import { join } from "node:path";
 import handleInternalAPI from "./services/api";
+import initSocket from "./services/socket";
 
 // The built directory structure
 //
@@ -35,7 +36,7 @@ if (!app.requestSingleInstanceLock()) {
 // Read more on https://www.electronjs.org/docs/latest/tutorial/security
 // process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 
-let win: BrowserWindow | null = null;
+export let win: BrowserWindow | null = null;
 // Here, you can also use other preload
 const preload = join(__dirname, "../preload/index.js");
 const url = process.env.VITE_DEV_SERVER_URL;
@@ -79,6 +80,8 @@ async function createWindow() {
     return { action: "deny" };
   });
 
+  // Init all the services
+  initSocket();
   handleInternalAPI();
 }
 
