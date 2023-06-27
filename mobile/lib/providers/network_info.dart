@@ -7,6 +7,6 @@ final networkInfoProvider = FutureProvider<NetworkInfoResponse>((ref) async {
 
   String? name = await info.getWifiName() ?? "-";
   String? ip = await info.getWifiIP() ?? "?";
-  print("name: ${name}, ip: ${ip}");
+  print("name: $name, ip: $ip");
   return NetworkInfoResponse(selfIp: ip, networkName: name);
 });

@@ -1,12 +1,10 @@
-import 'package:flify/types/network_info_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:network_info_plus/network_info_plus.dart';
 
 import '../../providers/network_info.dart';
 
 class CurrentNetworkInfo extends ConsumerWidget {
-  CurrentNetworkInfo({super.key});
+  const CurrentNetworkInfo({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -15,8 +13,8 @@ class CurrentNetworkInfo extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
+        const Padding(
+          padding: EdgeInsets.all(8.0),
           child: Icon(Icons.wifi),
         ),
         networkInfo.when(

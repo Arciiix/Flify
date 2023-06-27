@@ -1,11 +1,11 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flify/components/ui/AnimatedLogoTransition.dart';
 import 'package:flify/components/ui/Loading.dart';
-import 'package:flify/providers/recent_devices.dart';
-import 'package:flify/utils/form_validation.dart';
 import 'package:flify/providers/network_info.dart';
+import 'package:flify/providers/recent_devices.dart';
 import 'package:flify/types/recent_device.dart';
 import 'package:flify/types/socket.dart';
+import 'package:flify/utils/form_validation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import "package:go_router/go_router.dart";
@@ -211,7 +211,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     } else {
       return Scaffold(
           key: _scaffoldKey,
-          body: Column(children: [AnimatedLogoTransition()]));
+          body: const Column(children: [AnimatedLogoTransition()]));
     }
   }
 

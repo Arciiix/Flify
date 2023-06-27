@@ -1,10 +1,8 @@
 import 'package:flify/components/connect/CurrentNetworkInfo.dart';
 import 'package:flify/components/connect/RecentDevices.dart';
-import 'package:flify/components/ui/Logo.dart';
 import 'package:flutter/material.dart';
 
 import '../components/connect/ManualConnect.dart';
-import '../components/ui/AnimatedLogo.dart';
 import '../components/ui/AnimatedLogoTransition.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -32,7 +30,7 @@ class HomeScreen extends StatelessWidget {
             const AnimatedLogoTransition(),
             Text("Connect",
                 style: TextStyle(fontSize: 48, color: primaryColor)),
-            CurrentNetworkInfo(),
+            const CurrentNetworkInfo(),
             Text("Recent",
                 style: TextStyle(
                     color: primaryColor.withOpacity(0.6), fontSize: 19)),

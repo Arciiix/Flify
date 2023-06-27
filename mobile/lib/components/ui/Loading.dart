@@ -2,9 +2,6 @@ import 'package:flify/components/ui/AnimatedLogoTransition.dart';
 import 'package:flutter/material.dart';
 import "package:go_router/go_router.dart";
 
-import '../../screens/HomeScreen.dart';
-import 'AnimatedLogo.dart';
-
 class Loading extends StatelessWidget {
   String loadingText;
   bool showGoHomeButton;
