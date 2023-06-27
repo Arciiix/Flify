@@ -1,9 +1,9 @@
-import 'package:flify/components/connect/CurrentNetworkInfo.dart';
-import 'package:flify/components/connect/RecentDevices.dart';
+import 'package:flify/components/connect/current_network_info.dart';
+import 'package:flify/components/connect/recent_devices.dart';
 import 'package:flutter/material.dart';
 
-import '../components/connect/ManualConnect.dart';
-import '../components/ui/AnimatedLogoTransition.dart';
+import '../components/connect/manual_connect.dart';
+import '../components/ui/animated_logo_transition.dart';
 
 class HomeScreen extends StatelessWidget {
   final String? ip;

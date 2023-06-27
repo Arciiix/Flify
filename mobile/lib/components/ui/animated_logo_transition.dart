@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'AnimatedLogo.dart';
+import 'animated_logo.dart';
 
 const HERO_LOGO_TAG = "Flify_logo_animated";
 

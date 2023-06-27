@@ -1,4 +1,4 @@
-import 'package:flify/components/ui/Logo.dart';
+import 'package:flify/components/ui/logo.dart';
 import 'package:flutter/material.dart';
 import "dart:math";
 

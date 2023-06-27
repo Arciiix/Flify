@@ -1,6 +1,6 @@
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flify/components/ui/AnimatedLogoTransition.dart';
-import 'package:flify/components/ui/Loading.dart';
+import 'package:flify/components/ui/animated_logo_transition.dart';
+import 'package:flify/components/ui/loading.dart';
 import 'package:flify/providers/network_info.dart';
 import 'package:flify/providers/recent_devices.dart';
 import 'package:flify/types/recent_device.dart';
