@@ -1,9 +1,9 @@
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flify/components/bluetooth/bluetooth_devices.dart';
 import 'package:flify/components/ui/animated_logo_transition.dart';
 import 'package:flify/components/ui/loading.dart';
 import 'package:flify/providers/network_info.dart';
 import 'package:flify/providers/recent_devices.dart';
+import 'package:flify/providers/socket.dart';
 import 'package:flify/types/recent_device.dart';
 import 'package:flify/types/socket.dart';
 import 'package:flify/utils/form_validation.dart';
@@ -103,6 +103,10 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       'transports': ['websocket'],
       'forceNew': true
     });
+
+    // Update the provider value
+    ref.read(socketProvider.notifier).state = socket;
+
     setState(() {
       _loadingState = "Waiting for connection...";
     });
