@@ -18,6 +18,8 @@ void main() async {
       overrides: [isarProvider.overrideWithValue(db)], child: const Flify()));
 }
 
+const flifyColor = Color(0xFF206AC4);
+
 class Flify extends StatelessWidget {
   const Flify({super.key});
 
@@ -27,7 +29,7 @@ class Flify extends StatelessWidget {
     return MaterialApp.router(
       title: 'Flify',
       theme: ThemeData(
-        colorScheme: const ColorScheme.dark(primary: Color(0xFF206AC4)),
+        colorScheme: const ColorScheme.dark(primary: flifyColor),
         useMaterial3: true,
       ),
       routerConfig: router,
