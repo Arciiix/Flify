@@ -1,7 +1,10 @@
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flify/components/ui/AnimatedLogoTransition.dart';
 import 'package:flify/components/ui/Loading.dart';
 import 'package:flify/services/form_validation.dart';
+import 'package:flify/services/network_info.dart';
 import 'package:flify/types/recent_device.dart';
+import 'package:flify/types/socket.dart';
 import 'package:flutter/material.dart';
 import "package:go_router/go_router.dart";
 import 'package:isar/isar.dart';
@@ -24,6 +27,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   String? _loadingState = "Loading...";
   late final IO.Socket socket;
 
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+
   bool _isError = false;
 
   void validateIPAndPort() {
@@ -35,9 +40,34 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     }
   }
 
-  void initSocketConnection() {
+  Future<Metadata> gatherMetadata() async {
+    // Get own ip
+    var networkInfo = await getWifiName();
+    String? selfIp = networkInfo?['selfIp'];
+
+    // Get device name
+    final generalInfo = (await deviceInfo.deviceInfo).data;
+
+    String name;
+    if (generalInfo.containsKey("name")) {
+      name = generalInfo["name"];
+    } else if (generalInfo.containsKey("brand") ||
+        generalInfo.containsKey("model")) {
+      // "<brand> <model>" or "<brand>" or "<model>"
+      name =
+          '${generalInfo['brand'] ?? ''} ${generalInfo['model'] ?? ''}'.trim();
+    } else {
+      name = "Flify device";
+    }
+
+    return Metadata(selfIp: selfIp, deviceName: name);
+  }
+
+  void initSocketConnection(Metadata metadata) {
     // TODO: Think about migrating to HTTPS
-    socket = IO.io('http://${widget.ip}:${widget.port}');
+    socket = IO.io('http://${widget.ip}:${widget.port}', <String, dynamic>{
+      'transports': ['websocket'],
+    });
     setState(() {
       _loadingState = "Waiting for connection...";
     });
@@ -45,7 +75,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       if (!mounted) return;
 
       print("Successfully connnected to the socket!");
-      socket.emit("hello");
+
+      socket.emit("hello", metadata);
       setState(() {
         _loadingState = "Waiting for initial message...";
       });
@@ -78,7 +109,6 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     });
 
     // A reply to "hello" event send onConnect
-    // TODO: Receive some metadata
     socket.on("world", (_) {
       setState(() {
         _loadingState = null;
@@ -108,7 +138,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     });
 
     // Try to connect to the server
-    initSocketConnection();
+    Metadata metadata = await gatherMetadata();
+    initSocketConnection(metadata);
   }
 
   @override

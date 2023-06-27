@@ -7,6 +7,6 @@ export interface Client {
 }
 
 export interface Metadata {
-  selfIp: string;
+  selfIp?: string;
   deviceName: string;
 }

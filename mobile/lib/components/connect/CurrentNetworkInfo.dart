@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
+import '../../services/network_info.dart';
+
 class CurrentNetworkInfo extends StatefulWidget {
   CurrentNetworkInfo({super.key});
 
@@ -13,25 +15,15 @@ class _CurrentNetworkInfoState extends State<CurrentNetworkInfo> {
   String networkName = "-";
   String selfIp = "?";
 
-  void getWifiName() async {
-    try {
-      String? name = await info.getWifiName() ?? "-";
-      String? ip = await info.getWifiIP() ?? "?";
-      print("name: ${name}, ip: ${ip}");
-      setState(() {
-        selfIp = ip;
-        networkName = name;
-      });
-    } catch (e) {
-      print("Error while getting Wi-Fi name");
-      print(e);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    getWifiName();
+    getWifiName().then((value) {
+      setState(() {
+        networkName = value?['networkName'] ?? "-";
+        selfIp = value?['selfIp'] ?? "?";
+      });
+    });
   }
 
   @override
