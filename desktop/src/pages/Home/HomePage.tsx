@@ -4,13 +4,19 @@ import { useEffect, useState } from "react";
 
 import NetworkInfo from "@/components/network/NetworkInfo";
 import QRCodeDisplay from "@/components/network/QRCodeDisplay";
-import { connection } from "@/state/connection/connection.atom";
-import { useRecoilState } from "recoil";
 import MadeWithHeart from "@/components/ui/MadeWithHeart/MadeWithHeart";
+import { connection } from "@/state/connection/connection.atom";
+import { sockets } from "@/state/connection/sockets.atom";
+import { useRecoilValue } from "recoil";
+import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
-  const network = useRecoilState(connection);
+  const navigate = useNavigate();
+
+  const network = useRecoilValue(connection);
   const [text, setText] = useState<string | null>(null);
+  const deviceList = useRecoilValue(sockets);
+
   const getQRCodeText = async () => {
     const text = await getQRCodeData();
     setText(text);
@@ -19,6 +25,13 @@ export default function HomePage() {
   useEffect(() => {
     getQRCodeText();
   }, [network]);
+
+  useEffect(() => {
+    // If any device has connected
+    if (deviceList.length > 0) {
+      navigate("/app");
+    }
+  }, [deviceList]);
 
   return (
     <div className="flex flex-col items-center">
