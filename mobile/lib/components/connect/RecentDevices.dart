@@ -1,34 +1,21 @@
-import 'package:flify/services/isar_service.dart';
+import 'package:flify/providers/isar_service.dart';
+import 'package:flify/providers/recent_devices.dart';
 import 'package:flify/types/recent_device.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import "package:go_router/go_router.dart";
 
 import 'package:isar/isar.dart';
 
-class RecentDevices extends StatefulWidget {
+class RecentDevices extends ConsumerStatefulWidget {
   const RecentDevices({super.key});
 
   @override
-  State<RecentDevices> createState() => _RecentDevicesState();
+  RecentDevicesState createState() => RecentDevicesState();
 }
 
-class _RecentDevicesState extends State<RecentDevices> {
-  List<RecentDevice> devices = [];
-
-  Future<List<RecentDevice>> getRecentDevices() async {
-    List<RecentDevice> allDevices =
-        await IsarService.db.recentDevices.where().findAll();
-
-    // Sort them from the most recent one
-    allDevices
-        .sort((a, b) => b.lastConnectionDate.compareTo(a.lastConnectionDate));
-
-    setState(() {
-      devices = allDevices;
-    });
-
-    return allDevices;
-  }
+class RecentDevicesState extends ConsumerState<RecentDevices> {
+  late final Isar db;
 
   Future<void> deleteDevice(RecentDevice device) async {
     bool answer = await showDialog(
@@ -55,10 +42,10 @@ class _RecentDevicesState extends State<RecentDevices> {
         });
 
     if (answer) {
-      await IsarService.db.writeTxn(() async {
-        await IsarService.db.recentDevices.delete(device.id);
+      await db.writeTxn(() async {
+        await db.recentDevices.delete(device.id);
       });
-      await getRecentDevices();
+      ref.refresh(recentDevicesProvider);
     }
   }
 
@@ -70,32 +57,40 @@ class _RecentDevicesState extends State<RecentDevices> {
   @override
   void initState() {
     super.initState();
-    getRecentDevices();
+
+    db = ref.read(isarProvider);
+
+    ref.refresh(recentDevicesProvider);
   }
 
   @override
   Widget build(BuildContext context) {
+    final devices = ref.watch(recentDevicesProvider);
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: devices.isNotEmpty
-              ? devices
-                  .map((e) => Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: RawChip(
-                          label: Text("${e.name} (${e.ip.toString()})"),
-                          onDeleted: () => deleteDevice(e),
-                          onPressed: () {
-                            connectToDevice(e);
-                          },
-                        ),
-                      ))
-                  .toList()
-              : [Text("No recent devices! 👀")],
-        ),
-      ),
+          scrollDirection: Axis.horizontal,
+          child: devices.when(
+              data: (items) => Row(
+                    children: items.isNotEmpty
+                        ? items
+                            .map((e) => Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: RawChip(
+                                    label:
+                                        Text("${e.name} (${e.ip.toString()})"),
+                                    onDeleted: () => deleteDevice(e),
+                                    onPressed: () {
+                                      connectToDevice(e);
+                                    },
+                                  ),
+                                ))
+                            .toList()
+                        : [const Text("No recent devices! 👀")],
+                  ),
+              loading: () => const Text("Please wait... ⌛"),
+              error: (_, __) => const Text("Couldn't load... 😢"))),
     );
   }
 }

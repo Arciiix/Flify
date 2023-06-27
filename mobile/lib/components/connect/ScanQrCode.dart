@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:flify/services/form_validation.dart';
+import 'package:flify/utils/form_validation.dart';
 import 'package:flify/types/navigation_state.dart';
 import 'package:flify/utils/override_snackbar.dart';
 import 'package:flutter/material.dart';

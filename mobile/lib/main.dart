@@ -1,13 +1,21 @@
 import 'package:flify/router.dart';
-import 'package:flify/services/isar_service.dart';
+import 'package:flify/providers/isar_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flify/types/recent_device.dart';
+import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await IsarService.openDB();
+  final dir = await getApplicationDocumentsDirectory();
+  final db = await Isar.open([RecentDeviceSchema], directory: dir.path);
 
-  runApp(const Flify());
+  print("DB init");
+
+  runApp(ProviderScope(
+      overrides: [isarProvider.overrideWithValue(db)], child: const Flify()));
 }
 
 class Flify extends StatelessWidget {

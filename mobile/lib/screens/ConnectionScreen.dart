@@ -1,18 +1,20 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flify/components/ui/AnimatedLogoTransition.dart';
 import 'package:flify/components/ui/Loading.dart';
-import 'package:flify/services/form_validation.dart';
-import 'package:flify/services/network_info.dart';
+import 'package:flify/providers/recent_devices.dart';
+import 'package:flify/utils/form_validation.dart';
+import 'package:flify/providers/network_info.dart';
 import 'package:flify/types/recent_device.dart';
 import 'package:flify/types/socket.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import "package:go_router/go_router.dart";
 import 'package:isar/isar.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-import '../services/isar_service.dart';
+import '../providers/isar_service.dart';
 
-class ConnectionScreen extends StatefulWidget {
+class ConnectionScreen extends ConsumerStatefulWidget {
   final String ip;
   final String port;
   final String name;
@@ -20,10 +22,12 @@ class ConnectionScreen extends StatefulWidget {
       {super.key, required this.ip, required this.port, required this.name});
 
   @override
-  State<ConnectionScreen> createState() => _ConnectionScreenState();
+  ConnectionScreenState createState() => ConnectionScreenState();
 }
 
-class _ConnectionScreenState extends State<ConnectionScreen> {
+class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
+  late final Isar db;
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   String? _loadingState = "Loading...";
@@ -46,8 +50,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
   Future<Metadata> gatherMetadata() async {
     // Get own ip
-    var networkInfo = await getWifiName();
-    String? selfIp = networkInfo?['selfIp'];
+    var networkInfo = await ref.watch(networkInfoProvider.future);
+    String? selfIp = networkInfo.selfIp;
 
     // Get device name
     final generalInfo = (await deviceInfo.deviceInfo).data;
@@ -68,19 +72,24 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   }
 
   Future<void> updateName(String newName) async {
-    RecentDevice recentDevice = (await IsarService.db.recentDevices
-        .filter()
-        .ipEqualTo(widget.ip)
-        .and()
-        .portEqualTo(int.parse(widget.port))
-        .findFirst())!;
+    // RecentDevice recentDevice = (await db.recentDevices
+    //     .filter()
+    //     .ipEqualTo(widget.ip)
+    //     .and()
+    //     .portEqualTo(int.parse(widget.port))
+    //     .findFirst())!;
+
+    RecentDevice recentDevice = (await ref.read(recentDevicesProvider.future))
+        .firstWhere((element) =>
+            element.ip == widget.ip && element.port == int.parse(widget.port));
 
     recentDevice.name = newName;
 
-    await IsarService.db.writeTxn(() async {
-      await IsarService.db.recentDevices.put(recentDevice);
+    await db.writeTxn(() async {
+      await db.recentDevices.put(recentDevice);
       print("Updated this device's name in the db");
     });
+    ref.refresh(recentDevicesProvider);
 
     setState(() {
       remoteDeviceName = newName;
@@ -159,23 +168,23 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
     // Save to recent devices
     // Try to get the old one saves
-    RecentDevice recentDevice = await IsarService.db.recentDevices
-            .filter()
-            .ipEqualTo(widget.ip)
-            .and()
-            .portEqualTo(int.parse(widget.port))
-            .findFirst() ??
-        RecentDevice(
-            ip: widget.ip,
-            port: int.parse(widget.port),
-            name: remoteDeviceName);
+    RecentDevice recentDevice = (await ref.read(recentDevicesProvider.future))
+        .firstWhere(
+            (element) =>
+                element.ip == widget.ip &&
+                element.port == int.parse(widget.port),
+            orElse: () => RecentDevice(
+                ip: widget.ip,
+                port: int.parse(widget.port),
+                name: remoteDeviceName));
 
     recentDevice.lastConnectionDate = DateTime.now();
 
-    await IsarService.db.writeTxn(() async {
-      await IsarService.db.recentDevices.put(recentDevice);
+    await db.writeTxn(() async {
+      await db.recentDevices.put(recentDevice);
       print("Updated db with recent device");
     });
+    ref.refresh(recentDevicesProvider);
 
     // Try to connect to the server
     Metadata metadata = await gatherMetadata();
@@ -185,6 +194,8 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   @override
   void initState() {
     super.initState();
+    db = ref.read(isarProvider);
+
     remoteDeviceName = widget.name;
 
     WidgetsBinding.instance.addPostFrameCallback((_) => initConnection());
