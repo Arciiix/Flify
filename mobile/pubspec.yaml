@@ -44,7 +44,6 @@ dependencies:
   socket_io_client: ^2.0.2
   device_info_plus: ^9.0.2
   flutter_riverpod: ^2.3.6
-  flutter_blue_plus: ^1.5.2
   permission_handler: ^10.3.0
 
 dev_dependencies:
