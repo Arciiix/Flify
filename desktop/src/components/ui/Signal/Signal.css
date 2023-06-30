@@ -1,0 +1,12 @@
+.signal-strength-1 .signal-bar-3,
+.signal-strength-1 .signal-bar-2,
+.signal-strength-1 .signal-bar-1 {
+  display: none !important;
+}
+.signal-strength-2 .signal-bar-3,
+.signal-strength-1 .signal-bar-2 {
+  display: none !important;
+}
+.signal-strength-3 .signal-bar-3 {
+  display: none !important;
+}
