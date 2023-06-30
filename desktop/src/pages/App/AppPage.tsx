@@ -1,3 +1,4 @@
+import HostInfo from "@/components/info/HostInfo/HostInfo";
 import Logo from "@/components/ui/Logo/Logo";
 import { sockets } from "@/state/connection/sockets.atom";
 import React, { useEffect } from "react";
@@ -17,8 +18,9 @@ export default function AppPage() {
     }
   }, [deviceList]);
   return (
-    <div className="flex flex-col gap-3 items-center">
-      <Logo />
+    <div className="flex flex-col items-center gap-3">
+      <Logo isAnimated />
+      <HostInfo />
       {/* TODO: Display it nicely */}
       {deviceList.map((e) => {
         return <span>{JSON.stringify(e.metadata)}</span>;

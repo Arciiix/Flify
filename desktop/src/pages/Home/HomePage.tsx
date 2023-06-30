@@ -8,7 +8,7 @@ import MadeWithHeart from "@/components/ui/MadeWithHeart/MadeWithHeart";
 import { connection } from "@/state/connection/connection.atom";
 import { sockets } from "@/state/connection/sockets.atom";
 import { useRecoilValue } from "recoil";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function HomePage() {
   const navigate = useNavigate();
