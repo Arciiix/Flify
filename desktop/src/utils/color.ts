@@ -1,4 +1,4 @@
-import clamp from "./clamp";
+import { clamp, interpolateValue } from "./clamp";
 
 type RGBColor = {
   r: number;
@@ -23,9 +23,9 @@ export const getColorBetweenRanges = (
   const toRGB = parseColor(toColor);
 
   const resultRGB: RGBColor = {
-    r: interpolateColorValue(fromRGB.r, toRGB.r, percentage),
-    g: interpolateColorValue(fromRGB.g, toRGB.g, percentage),
-    b: interpolateColorValue(fromRGB.b, toRGB.b, percentage),
+    r: interpolateValue(fromRGB.r, toRGB.r, percentage),
+    g: interpolateValue(fromRGB.g, toRGB.g, percentage),
+    b: interpolateValue(fromRGB.b, toRGB.b, percentage),
   };
 
   return rgbToHex(resultRGB.r, resultRGB.g, resultRGB.b);
@@ -40,15 +40,6 @@ const parseColor = (color: string): RGBColor => {
     g: (rgb >> 8) & 0xff,
     b: rgb & 0xff,
   };
-};
-
-// Helper function to get the value by percent between two other values
-const interpolateColorValue = (
-  fromValue: number,
-  toValue: number,
-  percentage: number
-): number => {
-  return Math.round(fromValue + (toValue - fromValue) * percentage);
 };
 
 // Helper function to convert RGB color to HEX

@@ -19,8 +19,12 @@ export default function HostInfo() {
     [sliderValue]
   );
 
-  const handleSliderValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSliderValueInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSliderValue(e.target.valueAsNumber);
+
+    // TODO: Add debounce
+    // TODO: Change volume
+    console.log(`Change volume to ${e.target.valueAsNumber}`);
   };
 
   const changeAudioDevice = () => {
@@ -60,7 +64,7 @@ export default function HostInfo() {
             min="0"
             max="100"
             value={sliderValue}
-            onInput={handleSliderValueChange}
+            onInput={handleSliderValueInput}
             style={{ background: sliderLowerBarColor }}
           />
 

@@ -1,3 +1,4 @@
+import DeviceCard from "@/components/device/DeviceCard";
 import HostInfo from "@/components/info/HostInfo/HostInfo";
 import VolumeIndicator from "@/components/info/VolumeIndicator/VolumeIndicator";
 import Logo from "@/components/ui/Logo/Logo";
@@ -29,7 +30,8 @@ export default function AppPage() {
       </div>
       {/* TODO: Display it nicely */}
       {deviceList.map((e) => {
-        return <span>{JSON.stringify(e.metadata)}</span>;
+        // return <span>{JSON.stringify(e.metadata)}</span>;
+        return <DeviceCard />;
       })}
     </div>
   );
