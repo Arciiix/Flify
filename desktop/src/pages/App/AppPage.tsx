@@ -2,7 +2,7 @@ import HostInfo from "@/components/info/HostInfo/HostInfo";
 import VolumeIndicator from "@/components/info/VolumeIndicator/VolumeIndicator";
 import Logo from "@/components/ui/Logo/Logo";
 import { sockets } from "@/state/connection/sockets.atom";
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
