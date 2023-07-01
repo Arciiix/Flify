@@ -1,19 +1,13 @@
 import { useMemo, useState } from "react";
-import {
-  MdDeviceHub,
-  MdDevices,
-  MdKeyboardArrowDown,
-  MdOutlineSettings,
-  MdOutlineSpeaker,
-  MdSettings,
-  MdTune,
-} from "react-icons/md";
+import { MdDevices, MdOutlineSpeaker } from "react-icons/md";
 
+import Slider from "@/components/ui/Slider/Slider";
 import styles from "./HostInfo.module.css";
+import VolumeIcon from "@/components/ui/VolumeIcon/VolumeIcon";
 
 export default function HostInfo() {
   const [sliderValue, setSliderValue] = useState(50);
-  const sliderLowerBarColor = useMemo(
+  const sliderBarColor = useMemo(
     () =>
       `linear-gradient(to right, #24def7 0%, var(--flify) ${sliderValue}%, gray ${sliderValue}%, gray 100%)`,
     [sliderValue]
@@ -33,7 +27,7 @@ export default function HostInfo() {
   };
 
   return (
-    <div className="relative my-8">
+    <div className="relative my-5">
       <div
         className={`w-full absolute top-0 h-full rounded-full bg-flify bg-opacity-30 blur-2xl block ${styles.bg}`}
       ></div>
@@ -58,15 +52,14 @@ export default function HostInfo() {
         </div>
 
         <div className="mt-7 flex flex-col items-center gap-1">
-          <input
-            className={styles.slider}
-            type="range"
-            min="0"
-            max="100"
-            value={sliderValue}
-            onInput={handleSliderValueInput}
-            style={{ background: sliderLowerBarColor }}
-          />
+          <div className="w-full flex-1 flex items-center gap-2">
+            <VolumeIcon volume={sliderValue} />
+            <Slider
+              value={sliderValue}
+              onInput={handleSliderValueInput}
+              barColor={sliderBarColor}
+            />
+          </div>
 
           <span className="text-md">{Math.floor(sliderValue)}%</span>
         </div>
