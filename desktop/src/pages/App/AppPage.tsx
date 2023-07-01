@@ -1,3 +1,4 @@
+import AddDeviceCard from "@/components/device/AddDeviceCard";
 import DeviceCard from "@/components/device/DeviceCard";
 import HostInfo from "@/components/info/HostInfo/HostInfo";
 import SelectAudioDevice from "@/components/info/SelectAudioDevice/SelectAudioDevice";
@@ -8,6 +9,8 @@ import { sockets } from "@/state/connection/sockets.atom";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
+
+import "../../styles/scrollbar.css";
 
 export default function AppPage() {
   const navigate = useNavigate();
@@ -39,11 +42,22 @@ export default function AppPage() {
         <VolumeIndicator percentage={50} />
         <VolumeIndicator percentage={50} />
       </div>
-      {/* TODO: Display it nicely */}
-      {deviceList.map((e) => {
-        // return <span>{JSON.stringify(e.metadata)}</span>;
-        return <DeviceCard />;
-      })}
+
+      <div>
+        <div className="flex w-full justify-center">
+          <span className="font-flify text-4xl">Devices</span>
+          <span>{deviceList.length}</span>
+        </div>
+        <div className="flex w-[calc(100vw-20px)] px-2 overflow-x-auto">
+          {deviceList.map((e) => {
+            return <DeviceCard key={e.socketId} />;
+          })}
+          <DeviceCard />
+          <DeviceCard />
+          <DeviceCard />
+          <AddDeviceCard />
+        </div>
+      </div>
     </div>
   );
 }

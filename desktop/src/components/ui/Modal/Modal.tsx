@@ -18,7 +18,13 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
         isOpen ? "visible" : "hidden"
       }`}
     >
-      <div className="fixed inset-0 bg-black opacity-50"></div>
+      <div
+        className="fixed inset-0 bg-black opacity-50"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
+      ></div>
       <div className="absolute top-2 right-2">
         <CloseButton title="Close" key={"modal-close"} onClick={closeModal} />
       </div>

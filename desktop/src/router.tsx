@@ -11,6 +11,10 @@ const router = createBrowserRouter([
     path: "/app",
     element: <AppPage />,
   },
+  {
+    path: "/add",
+    element: <HomePage alreadyConnected />,
+  },
 ]);
 
 export default router;

@@ -7,10 +7,15 @@ import QRCodeDisplay from "@/components/network/QRCodeDisplay";
 import MadeWithHeart from "@/components/ui/MadeWithHeart/MadeWithHeart";
 import { connection } from "@/state/connection/connection.atom";
 import { sockets } from "@/state/connection/sockets.atom";
-import { useRecoilValue } from "recoil";
 import { Link, useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import { MdOutlineSpeaker } from "react-icons/md";
 
-export default function HomePage() {
+interface HomePageProps {
+  alreadyConnected?: boolean;
+}
+
+export default function HomePage({ alreadyConnected }: HomePageProps) {
   const navigate = useNavigate();
 
   const network = useRecoilValue(connection);
@@ -28,14 +33,42 @@ export default function HomePage() {
 
   useEffect(() => {
     // If any device has connected
-    if (deviceList.length > 0) {
+    if (deviceList.length > 0 && !alreadyConnected) {
       navigate("/app");
     }
   }, [deviceList]);
 
   return (
     <div className="flex flex-col items-center">
-      <Logo isAnimated width={160} />
+      {alreadyConnected ? (
+        // TODO: Create a small indicator that there's a connection
+        <Link
+          className="bg-flify bg-opacity-20 rounded-xl p-4 m-3 flex flex-col items-center gap-3 border-flify border-2 w-1/2 hover:bg-opacity-30 transition-colors cursor-pointer"
+          to="/app"
+        >
+          <Logo isAnimated width={80} />
+          {/* TODO: Maybe add underline animation */}
+          <span className="text-2xl font-flify">
+            In a connection with{" "}
+            <span className="font-bold">
+              {deviceList.length} device
+              {deviceList.length === 1 ? "" : "s"}
+            </span>
+          </span>
+          {/* TODO: Display audio info */}
+          <span>Click here to go back to connection view</span>
+          <div className="flex gap-1 items-center">
+            <MdOutlineSpeaker size={16} />
+            <span className="text-sm">
+              Audio Device Name, x channels, 44100 Hz
+            </span>
+          </div>
+          {/* TODO: Maybe volume? */}
+        </Link>
+      ) : (
+        <Logo isAnimated width={160} />
+      )}
+
       <QRCodeDisplay text={text} />
 
       <span className="text-slate-200">or with manual connection</span>
