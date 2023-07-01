@@ -1,7 +1,7 @@
 import { getIconForOs } from "@/utils/os";
 import Battery from "../ui/Battery/Battery";
 import Signal from "../ui/Signal/Signal";
-import DisconnectButton from "./DisconnectButton";
+import DisconnectButton from "../ui/CloseButton/CloseButton";
 
 import { useMemo, useState } from "react";
 import { OperatingSystem } from "../../../types/os.types";
@@ -34,7 +34,10 @@ export default function DeviceCard() {
           <Battery percentage={50} />
         </div>
         <div className="flex-1 flex justify-center">
-          <DisconnectButton onDisconnect={handleDisconnect} />
+          <DisconnectButton
+            onClick={handleDisconnect}
+            title={"Remove device"}
+          />
         </div>
         <div className="flex-1 flex justify-end">
           <Signal latency={50} />

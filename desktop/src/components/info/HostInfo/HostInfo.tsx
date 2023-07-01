@@ -5,7 +5,11 @@ import Slider from "@/components/ui/Slider/Slider";
 import styles from "./HostInfo.module.css";
 import VolumeIcon from "@/components/ui/VolumeIcon/VolumeIcon";
 
-export default function HostInfo() {
+interface HostInfoProps {
+  onAudioDeviceChange: () => void;
+}
+
+export default function HostInfo({ onAudioDeviceChange }: HostInfoProps) {
   const [sliderValue, setSliderValue] = useState(50);
   const sliderBarColor = useMemo(
     () =>
@@ -22,8 +26,7 @@ export default function HostInfo() {
   };
 
   const changeAudioDevice = () => {
-    // TODO: Change audio device
-    console.log("Change audio device");
+    onAudioDeviceChange();
   };
 
   return (
