@@ -8,7 +8,7 @@ interface QRCodeDisplayProps {
 
 export default function QRCodeDisplay({ text }: QRCodeDisplayProps) {
   return (
-    <div className="my-4">
+    <div className="my-4 bg-white p-3 rounded-xl">
       {text === null ? null : (
         <QRCode
           value={text}
