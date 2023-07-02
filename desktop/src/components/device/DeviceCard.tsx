@@ -1,19 +1,36 @@
 import { getIconForOs } from "@/utils/os";
 import Battery from "../ui/Battery/Battery";
-import Signal from "../ui/Signal/Signal";
 import DisconnectButton from "../ui/CloseButton/CloseButton";
+import Signal from "../ui/Signal/Signal";
 
-import { useMemo, useState } from "react";
-import { OperatingSystem } from "../../../types/os.types";
+import { secondsToFormattedTime } from "@/utils/time";
+import { useEffect, useMemo, useState } from "react";
+import { Client } from "types/socket.types";
+import Modal from "../ui/Modal/Modal";
 import Slider from "../ui/Slider/Slider";
 import VolumeIcon from "../ui/VolumeIcon/VolumeIcon";
+import ConfirmDisconnect from "./ConfirmDIsconnect";
 
-export default function DeviceCard() {
-  // DEV
-  // TODO: Make it work
-  const Icon = useMemo(() => getIconForOs(OperatingSystem.android), []);
+interface DeviceCardProps {
+  device: Client;
+}
+
+export default function DeviceCard({ device }: DeviceCardProps) {
+  const Icon = useMemo(
+    () => getIconForOs(device.metadata.os),
+    [device.metadata]
+  );
 
   const [volume, setVolume] = useState(50);
+  const [uptime, setUptime] = useState(0);
+  const [isConfirmingDisconnect, setIsConfirmingDisconnect] = useState(false);
+
+  const uptimeString = useMemo(() => {
+    return secondsToFormattedTime(uptime);
+  }, [uptime]);
+
+  // TODO: Get volume from device
+
   const sliderBarColor = useMemo(() => {
     return `linear-gradient(to right, #ffffff 0%, #ffffff ${volume}%, gray ${volume}%, gray 100%)`;
   }, [volume]);
@@ -22,13 +39,32 @@ export default function DeviceCard() {
     setVolume(e.target.valueAsNumber);
   };
 
-  const handleDisconnect = () => {
-    // TODO: Handle disconnect
-    console.log("disconnect");
-  };
+  const handleDisconnect = () => setIsConfirmingDisconnect(true);
+  const closeDisconnectConfirmation = () => setIsConfirmingDisconnect(false);
+
+  useEffect(() => {
+    setUptime(0);
+
+    const interval = setInterval(() => {
+      setUptime((old) => old + 1);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [device.socketId]);
 
   return (
     <div className="flex flex-col bg-flify bg-opacity-20 p-4 m-6 rounded-xl min-w-[28rem] max-w-lg items-center gap-2">
+      <Modal
+        isOpen={isConfirmingDisconnect}
+        onClose={closeDisconnectConfirmation}
+      >
+        <ConfirmDisconnect
+          device={device}
+          onCancel={closeDisconnectConfirmation}
+        />
+      </Modal>
       <div className="flex justify-around w-full p-2">
         <div className="flex-1 flex justify-start">
           <Battery percentage={50} />
@@ -44,7 +80,7 @@ export default function DeviceCard() {
         </div>
       </div>
       <Icon size={72} />
-      <span className="text-3xl font-bold">Device name here</span>
+      <span className="text-3xl font-bold">{device.metadata.deviceName}</span>
 
       <div className="flex-1 w-full flex flex-col m-5 gap-3 items-center">
         <div className="w-full flex-1 flex items-center gap-2">
@@ -59,8 +95,8 @@ export default function DeviceCard() {
       </div>
 
       <div className="w-full flex justify-between p-1 text-lg text-slate-400">
-        <span>00:00:02</span>
-        <span>192.168.0.100</span>
+        <span>{uptimeString}</span>
+        <span>{device.metadata.selfIp ?? "somewhere 👀"}</span>
       </div>
     </div>
   );

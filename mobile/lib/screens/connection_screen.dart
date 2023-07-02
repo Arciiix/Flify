@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flify/components/ui/animated_logo_transition.dart';
 import 'package:flify/components/ui/loading.dart';
@@ -69,7 +71,10 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       name = "Flify device";
     }
 
-    return Metadata(selfIp: selfIp, deviceName: name);
+    // Get os
+    String os = Platform.operatingSystem;
+
+    return Metadata(selfIp: selfIp, deviceName: name, os: os);
   }
 
   Future<void> updateName(String newName) async {

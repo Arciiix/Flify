@@ -50,11 +50,8 @@ export default function AppPage() {
         </div>
         <div className="flex w-[calc(100vw-20px)] px-2 overflow-x-auto">
           {deviceList.map((e) => {
-            return <DeviceCard key={e.socketId} />;
+            return <DeviceCard key={e.socketId} device={e} />;
           })}
-          <DeviceCard />
-          <DeviceCard />
-          <DeviceCard />
           <AddDeviceCard />
         </div>
       </div>
