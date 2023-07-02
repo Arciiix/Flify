@@ -9,7 +9,7 @@ import { Client } from "types/socket.types";
 import Modal from "../ui/Modal/Modal";
 import Slider from "../ui/Slider/Slider";
 import VolumeIcon from "../ui/VolumeIcon/VolumeIcon";
-import ConfirmDisconnect from "./ConfirmDIsconnect";
+import ConfirmDisconnect from "./ConfirmDisconnect";
 
 interface DeviceCardProps {
   device: Client;
