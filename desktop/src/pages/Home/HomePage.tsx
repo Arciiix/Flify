@@ -41,13 +41,11 @@ export default function HomePage({ alreadyConnected }: HomePageProps) {
   return (
     <div className="flex flex-col items-center">
       {alreadyConnected ? (
-        // TODO: Create a small indicator that there's a connection
         <Link
-          className="bg-flify bg-opacity-20 rounded-xl p-4 m-3 flex flex-col items-center gap-3 border-flify border-2 w-1/2 hover:bg-opacity-30 transition-colors cursor-pointer"
+          className="group bg-flify bg-opacity-20 rounded-xl p-4 m-3 flex flex-col items-center gap-3 border-flify border-2 w-1/2 hover:bg-opacity-30 transition-colors cursor-pointer"
           to="/app"
         >
           <Logo isAnimated width={80} />
-          {/* TODO: Maybe add underline animation */}
           <span className="text-2xl font-flify">
             In a connection with{" "}
             <span className="font-bold">
@@ -55,8 +53,10 @@ export default function HomePage({ alreadyConnected }: HomePageProps) {
               {deviceList.length === 1 ? "" : "s"}
             </span>
           </span>
+          <span className="bg-left-bottom bg-gradient-to-r from-flify pb-1 to-blue-400 bg-[length:0%_2px] bg-no-repeat group-hover:bg-[length:100%_2px] transition-all duration-500 ease-out">
+            Click here to go back to the connection view
+          </span>
           {/* TODO: Display audio info */}
-          <span>Click here to go back to connection view</span>
           <div className="flex gap-1 items-center">
             <MdOutlineSpeaker size={16} />
             <span className="text-sm">
