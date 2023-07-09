@@ -11,9 +11,11 @@ import 'package:flify/types/socket.dart';
 import 'package:flify/utils/form_validation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import "package:go_router/go_router.dart";
 import 'package:isar/isar.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_common/src/util/event_emitter.dart';
 
 import '../providers/isar_service.dart';
 
@@ -39,6 +41,9 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   late String remoteDeviceName;
 
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+
+  Session? _currentSession;
+  FlutterSoundPlayer? player;
 
   bool _isError = false;
 
@@ -125,6 +130,67 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         _loadingState = "Waiting for initial message...";
       });
     });
+
+    socket.on("init", (session) async {
+      if (_currentSession != null) {
+        print(
+            "Trying to init ${session['id']} but there's already a session ${_currentSession!.id!}!");
+        return;
+      }
+      setState(() {
+        _currentSession = Session()
+          ..id = session['id']
+          ..params = (AudioParams()
+            ..channelCount = session['params']['channelCount']
+            ..sampleRate = session['params']['sampleRate']);
+        player = FlutterSoundPlayer();
+      });
+      print("INIT FINISH  ${_currentSession!.id}!");
+
+      await player!.openPlayer(enableVoiceProcessing: false);
+
+      await player!.startPlayerFromStream(
+          codec: Codec.pcm16,
+          numChannels: _currentSession!.params!.channelCount!,
+          sampleRate: _currentSession!.params!.sampleRate!);
+
+      print("INIT FINISH  ${_currentSession!.id}!");
+    });
+
+    socket.on("data", (payload) {
+      if (_currentSession == null ||
+          _currentSession?.id != payload['i'] ||
+          player == null ||
+          !player!.isOpen() ||
+          !player!.isPlaying) {
+        print("Received data not in the session, return...");
+        return;
+      }
+      print("DATA!");
+      player!.foodSink!.add(FoodData(payload['d']));
+      print("added to player");
+      // TODO: Send if every nth data
+      // Send battery info etc. here
+      socket.emit(
+          "data_heartbeat",
+          DataHeartbeat(
+                  initialDataTimestamp: DateTime.tryParse(payload['t']),
+                  timestamp: DateTime.now())
+              .toJson());
+    });
+
+    socket.on("stop", (session) {
+      if (_currentSession?.id != session['id']) return;
+      player?.stopPlayer();
+
+      print("Stopped");
+
+      setState(() {
+        player = null;
+        _currentSession = null;
+      });
+    });
+
     socket.onConnectError((data) {
       if (!mounted) return;
 

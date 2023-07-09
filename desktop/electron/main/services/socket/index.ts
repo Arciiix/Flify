@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import { config } from "../config/env";
 import handleSocketConnection from "./events";
 
-const io = new Server({
+export const io = new Server({
   cors: {
     origin: "*", // So that any client can connect
   },

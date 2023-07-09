@@ -8,14 +8,20 @@ import Modal from "@/components/ui/Modal/Modal";
 import { sockets } from "@/state/connection/sockets.atom";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { channelsVolume } from "@/state/volume/channels.atom";
 
 import "../../styles/scrollbar.css";
+import { ChannelsVolume } from "types/volume.types";
+const { ipcRenderer } = require("electron");
 
 export default function AppPage() {
   const navigate = useNavigate();
 
   const deviceList = useRecoilValue(sockets);
+
+  const [currentChannelsVolume, setCurrentChannelsVolume] =
+    useRecoilState(channelsVolume);
 
   const [isDeviceSelectModalVisible, setIsDeviceSelectModalVisible] =
     useState(false);
@@ -29,6 +35,21 @@ export default function AppPage() {
       navigate("/");
     }
   }, [deviceList]);
+
+  useEffect(() => {
+    const handleChannelsVolume = (
+      _event: Electron.IpcRendererEvent,
+      value: ChannelsVolume
+    ) => {
+      console.log(value);
+      setCurrentChannelsVolume(value);
+    };
+    ipcRenderer.on("channels/volume", handleChannelsVolume);
+
+    return () => {
+      ipcRenderer.removeListener("channels/volume", handleChannelsVolume);
+    };
+  }, []);
   return (
     <div className="flex flex-col items-center gap-3">
       <Modal isOpen={isDeviceSelectModalVisible} onClose={toggleModal}>
@@ -39,8 +60,10 @@ export default function AppPage() {
       <HostInfo onAudioDeviceChange={toggleModal} />
 
       <div className="flex flex-col w-5/12 gap-1">
-        <VolumeIndicator percentage={50} />
-        <VolumeIndicator percentage={50} />
+        <VolumeIndicator percentage={currentChannelsVolume.leftChannel * 100} />
+        <VolumeIndicator
+          percentage={currentChannelsVolume.rightChannel * 100}
+        />
       </div>
 
       <div>

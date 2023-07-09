@@ -22,3 +22,8 @@ export interface Metadata {
 export interface WorldPayload {
   hostname: string;
 }
+
+export interface DataHeartbeat {
+  initialDataTimestamp: Date | null;
+  timestamp: Date | null;
+}
