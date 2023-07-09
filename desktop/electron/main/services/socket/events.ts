@@ -8,6 +8,7 @@ import {
 import { updateSocketList } from "../api/socket/socketEvents";
 import { getHostname } from "../network/getNetworkData";
 import { startWithDefault, stopPortaudio } from "../audio/audio";
+import { updateCurrentState } from "../api/device/updateCurrentState";
 
 export let connectedSockets: Client[] = [];
 
@@ -32,7 +33,30 @@ export default function handleSocketConnection(socket: Socket) {
   });
 
   socket.on("data_heartbeat", (dataHeartbeat: DataHeartbeat) => {
+    // Used to measure the latency and whether the device is still connected
     console.log("heartbeat", dataHeartbeat);
+    const ping =
+      new Date().getTime() -
+      new Date(
+        dataHeartbeat?.initialDataTimestamp ??
+          dataHeartbeat?.timestamp ??
+          new Date()
+      )?.getTime();
+    updateCurrentState(socket.id, {
+      ping,
+    });
+  });
+
+  socket.on("update_volume", (volume: number) => {
+    console.log("volume", volume);
+    updateCurrentState(socket.id, {
+      volume,
+    });
+  });
+  socket.on("update_battery", (batteryLevel: number) => {
+    updateCurrentState(socket.id, {
+      batteryLevel,
+    });
   });
 
   socket.on("disconnect", () => {

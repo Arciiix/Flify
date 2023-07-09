@@ -21,7 +21,9 @@ export default function DeviceCard({ device }: DeviceCardProps) {
     [device.metadata]
   );
 
-  const [volume, setVolume] = useState(50);
+  // const [volume, setVolume] = useState(50);
+  const volume = useMemo(() => (device.state?.volume ?? 0) * 100, [device]);
+
   const [uptime, setUptime] = useState(0);
   const [isConfirmingDisconnect, setIsConfirmingDisconnect] = useState(false);
 
@@ -29,14 +31,12 @@ export default function DeviceCard({ device }: DeviceCardProps) {
     return secondsToFormattedTime(uptime);
   }, [uptime]);
 
-  // TODO: Get volume from device
-
   const sliderBarColor = useMemo(() => {
     return `linear-gradient(to right, #ffffff 0%, #ffffff ${volume}%, gray ${volume}%, gray 100%)`;
   }, [volume]);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVolume(e.target.valueAsNumber);
+    // setVolume(e.target.valueAsNumber);
   };
 
   const handleDisconnect = () => setIsConfirmingDisconnect(true);
@@ -67,7 +67,7 @@ export default function DeviceCard({ device }: DeviceCardProps) {
       </Modal>
       <div className="flex justify-around w-full p-2">
         <div className="flex-1 flex justify-start">
-          <Battery percentage={50} />
+          <Battery percentage={device.state?.batteryLevel ?? 0} />
         </div>
         <div className="flex-1 flex justify-center">
           <DisconnectButton
@@ -76,7 +76,7 @@ export default function DeviceCard({ device }: DeviceCardProps) {
           />
         </div>
         <div className="flex-1 flex justify-end">
-          <Signal latency={50} />
+          <Signal latency={device.state?.ping ?? -1} />
         </div>
       </div>
       <Icon size={72} />

@@ -6,7 +6,7 @@ import { sockets } from "@/state/connection/sockets.atom";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { AudioDevice } from "types/audio.types";
-import { Client } from "types/socket.types";
+import { Client, DeviceState } from "types/socket.types";
 const { ipcRenderer } = require("electron");
 
 interface InitProps {
@@ -33,6 +33,17 @@ export default function Init({ children }: InitProps) {
     ipcRenderer.on("audio/device", (_, newDevice: AudioDevice | null) => {
       console.log("Audio device updated!", newDevice);
       setCurrentAudioDevice(newDevice);
+    });
+
+    ipcRenderer.on("device/update", (_, data: Client) => {
+      setSocketList((prev) => {
+        if (!prev) return prev;
+
+        console.log(`Updated state for ${data.socketId}!`, data);
+        return prev.map((element) =>
+          element.socketId === data.socketId ? data : element
+        ); // If the current element is the updated one, return the updated one. Instead return the old one
+      });
     });
   };
 

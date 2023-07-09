@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:battery_info/battery_info_plugin.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flify/components/ui/animated_logo_transition.dart';
 import 'package:flify/components/ui/loading.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_sound/flutter_sound.dart';
 import "package:go_router/go_router.dart";
 import 'package:isar/isar.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:volume_controller/volume_controller.dart';
 
 import '../providers/isar_service.dart';
 
@@ -48,6 +50,11 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   FlutterSoundPlayer? player;
 
   bool _isError = false;
+
+  late double selfVolume;
+  late int batteryLevel;
+
+  DateTime lastHeartbeat = DateTime.now();
 
   late final FlutterLocalNotificationsPlugin localNotifications;
 
@@ -124,10 +131,30 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     setState(() {
       _loadingState = "Waiting for connection...";
     });
-    socket.onConnect((_) {
+    socket.onConnect((_) async {
       if (!mounted) return;
 
       print("Successfully connnected to the socket!");
+
+      // Listen to volume change
+      VolumeController().listener((volume) {
+        setState(() => selfVolume = volume);
+        socket.emit("update_volume", volume);
+      });
+
+      // Listen to battery level change
+      BatteryInfoPlugin().androidBatteryInfoStream.listen((event) {
+        setState(() {
+          batteryLevel = event?.batteryLevel ?? 0;
+        });
+        socket.emit("update_battery", batteryLevel);
+      });
+      BatteryInfoPlugin().iosBatteryInfoStream.listen((event) {
+        setState(() {
+          batteryLevel = event?.batteryLevel ?? 0;
+        });
+        socket.emit("update_battery", batteryLevel);
+      });
 
       socket.emit("hello", metadata);
       setState(() {
@@ -174,14 +201,17 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       print("DATA!");
       player!.foodSink!.add(FoodData(payload['d']));
       print("added to player");
-      // TODO: Send if every nth data
-      // Send battery info etc. here
-      socket.emit(
-          "data_heartbeat",
-          DataHeartbeat(
-                  initialDataTimestamp: DateTime.tryParse(payload['t']),
-                  timestamp: DateTime.now())
-              .toJson());
+
+      // If the time has come, also send the heartbeat
+      if (DateTime.now().difference(lastHeartbeat).inSeconds > 5) {
+        socket.emit(
+            "data_heartbeat",
+            DataHeartbeat(
+                    initialDataTimestamp: DateTime.tryParse(payload['t']),
+                    timestamp: DateTime.now())
+                .toJson());
+        lastHeartbeat = DateTime.now();
+      }
     });
 
     socket.on("stop", (session) {
@@ -325,6 +355,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     socket.dispose();
 
     localNotifications.cancel(NOTIFICATION_ID);
+    VolumeController().removeListener();
 
     super.dispose();
   }

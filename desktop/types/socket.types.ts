@@ -10,8 +10,11 @@ export interface Client {
 
 export interface DeviceState {
   batteryLevel: number;
+  volume: number;
   ping: number;
 }
+
+export type DeviceStateUpdate = Partial<DeviceState>;
 
 export interface Metadata {
   selfIp?: string;
