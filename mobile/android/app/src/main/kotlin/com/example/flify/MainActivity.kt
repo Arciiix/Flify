@@ -1,4 +1,4 @@
-package com.example.flify
+package com.arciiix.flify
 
 import io.flutter.embedding.android.FlutterActivity
 

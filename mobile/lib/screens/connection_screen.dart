@@ -1,23 +1,25 @@
 import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flify/components/ui/animated_logo_transition.dart';
 import 'package:flify/components/ui/loading.dart';
 import 'package:flify/providers/network_info.dart';
+import 'package:flify/providers/notifications.dart';
 import 'package:flify/providers/recent_devices.dart';
 import 'package:flify/providers/socket.dart';
 import 'package:flify/types/recent_device.dart';
 import 'package:flify/types/socket.dart';
 import 'package:flify/utils/form_validation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import "package:go_router/go_router.dart";
 import 'package:isar/isar.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:socket_io_common/src/util/event_emitter.dart';
 
 import '../providers/isar_service.dart';
+
+const NOTIFICATION_ID = 0;
 
 class ConnectionScreen extends ConsumerStatefulWidget {
   final String ip;
@@ -46,6 +48,8 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   FlutterSoundPlayer? player;
 
   bool _isError = false;
+
+  late final FlutterLocalNotificationsPlugin localNotifications;
 
   void validateIPAndPort() {
     // Check if ip and port are valid
@@ -155,6 +159,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
           sampleRate: _currentSession!.params!.sampleRate!);
 
       print("INIT FINISH  ${_currentSession!.id}!");
+      showNotification();
     });
 
     socket.on("data", (payload) {
@@ -267,10 +272,30 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     initSocketConnection(metadata);
   }
 
+  void showNotification() async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails('Flify', 'Flify',
+            showWhen: true,
+            usesChronometer: true,
+            ongoing: true,
+            icon: "@mipmap/launcher_icon");
+
+    const NotificationDetails notificationDetails =
+        NotificationDetails(android: androidDetails);
+
+    await localNotifications.show(
+      NOTIFICATION_ID,
+      'Flify',
+      'Connected to: $remoteDeviceName',
+      notificationDetails,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     db = ref.read(isarProvider);
+    localNotifications = ref.read(flutterLocalNotificationsProvider);
 
     remoteDeviceName = widget.name;
 
@@ -298,6 +323,8 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     print("DISPOSE! Disconnect from server");
     socket.disconnect();
     socket.dispose();
+
+    localNotifications.cancel(NOTIFICATION_ID);
 
     super.dispose();
   }
