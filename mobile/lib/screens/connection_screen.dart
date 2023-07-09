@@ -54,7 +54,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   late double selfVolume;
   late int batteryLevel;
 
-  DateTime lastHeartbeat = DateTime.now();
+  DateTime lastHeartbeat = DateTime.fromMillisecondsSinceEpoch(0);
 
   late final FlutterLocalNotificationsPlugin localNotifications;
 
@@ -212,6 +212,12 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
                 .toJson());
         lastHeartbeat = DateTime.now();
       }
+    });
+
+    socket.on("change_volume", (volume) {
+      int newVolume = int.tryParse(volume.toString()) ?? 100;
+      print("Change volume to $newVolume");
+      VolumeController().setVolume(newVolume / 100);
     });
 
     socket.on("stop", (session) {

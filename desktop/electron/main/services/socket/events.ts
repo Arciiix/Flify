@@ -7,7 +7,7 @@ import {
 } from "../../../../types/socket.types";
 import { updateSocketList } from "../api/socket/socketEvents";
 import { getHostname } from "../network/getNetworkData";
-import { startWithDefault, stopPortaudio } from "../audio/audio";
+import { session, startWithDefault, stopPortaudio } from "../audio/audio";
 import { updateCurrentState } from "../api/device/updateCurrentState";
 
 export let connectedSockets: Client[] = [];
@@ -30,6 +30,11 @@ export default function handleSocketConnection(socket: Socket) {
     socket.emit("world", {
       hostname,
     } satisfies WorldPayload); // Reply event to the "hello" initial event
+
+    // If there's an audio session, send init event
+    if (session) {
+      socket.emit("init", session);
+    }
   });
 
   socket.on("data_heartbeat", (dataHeartbeat: DataHeartbeat) => {
@@ -48,9 +53,8 @@ export default function handleSocketConnection(socket: Socket) {
   });
 
   socket.on("update_volume", (volume: number) => {
-    console.log("volume", volume);
     updateCurrentState(socket.id, {
-      volume,
+      volume: Math.round(volume * 100),
     });
   });
   socket.on("update_battery", (batteryLevel: number) => {

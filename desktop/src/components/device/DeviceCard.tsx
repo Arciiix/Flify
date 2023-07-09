@@ -10,6 +10,7 @@ import Modal from "../ui/Modal/Modal";
 import Slider from "../ui/Slider/Slider";
 import VolumeIcon from "../ui/VolumeIcon/VolumeIcon";
 import ConfirmDisconnect from "./ConfirmDisconnect";
+import { changeVolume } from "@/services/device/changeVolume";
 
 interface DeviceCardProps {
   device: Client;
@@ -21,8 +22,7 @@ export default function DeviceCard({ device }: DeviceCardProps) {
     [device.metadata]
   );
 
-  // const [volume, setVolume] = useState(50);
-  const volume = useMemo(() => (device.state?.volume ?? 0) * 100, [device]);
+  const [volume, setVolume] = useState(0);
 
   const [uptime, setUptime] = useState(0);
   const [isConfirmingDisconnect, setIsConfirmingDisconnect] = useState(false);
@@ -36,7 +36,7 @@ export default function DeviceCard({ device }: DeviceCardProps) {
   }, [volume]);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // setVolume(e.target.valueAsNumber);
+    setVolume(e.target.valueAsNumber);
   };
 
   const handleDisconnect = () => setIsConfirmingDisconnect(true);
@@ -53,6 +53,23 @@ export default function DeviceCard({ device }: DeviceCardProps) {
       clearInterval(interval);
     };
   }, [device.socketId]);
+
+  useEffect(() => {
+    if (!device.state) return;
+    setVolume(device.state!.volume ?? 0);
+  }, [device.state]);
+
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      if (volume !== device.state?.volume) {
+        changeVolume(device.socketId, Math.round(volume));
+      }
+    }, 200);
+
+    return () => {
+      clearTimeout(debounce);
+    };
+  }, [device.state, volume]);
 
   return (
     <div className="flex flex-col bg-flify bg-opacity-20 p-4 m-6 rounded-xl min-w-[28rem] max-w-lg items-center gap-2">

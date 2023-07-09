@@ -41,7 +41,6 @@ export default function AppPage() {
       _event: Electron.IpcRendererEvent,
       value: ChannelsVolume
     ) => {
-      console.log(value);
       setCurrentChannelsVolume(value);
     };
     ipcRenderer.on("channels/volume", handleChannelsVolume);
