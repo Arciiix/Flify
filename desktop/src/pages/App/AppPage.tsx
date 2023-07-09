@@ -53,7 +53,7 @@ export default function AppPage() {
   return (
     <div className="flex flex-col items-center gap-3">
       <Modal isOpen={isDeviceSelectModalVisible} onClose={toggleModal}>
-        <SelectAudioDevice />
+        <SelectAudioDevice onClose={toggleModal} />
       </Modal>
 
       <Logo isAnimated />
