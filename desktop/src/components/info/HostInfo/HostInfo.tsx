@@ -4,12 +4,18 @@ import { MdDevices, MdOutlineSpeaker } from "react-icons/md";
 import Slider from "@/components/ui/Slider/Slider";
 import styles from "./HostInfo.module.css";
 import VolumeIcon from "@/components/ui/VolumeIcon/VolumeIcon";
+import { connection } from "@/state/connection/connection.atom";
+import { useRecoilValue } from "recoil";
+import { audioDevice } from "@/state/connection/audioDevice.atom";
 
 interface HostInfoProps {
   onAudioDeviceChange: () => void;
 }
 
 export default function HostInfo({ onAudioDeviceChange }: HostInfoProps) {
+  const networkInfo = useRecoilValue(connection);
+  const currentAudioDevice = useRecoilValue(audioDevice);
+
   const [sliderValue, setSliderValue] = useState(50);
   const sliderBarColor = useMemo(
     () =>
@@ -29,6 +35,7 @@ export default function HostInfo({ onAudioDeviceChange }: HostInfoProps) {
     onAudioDeviceChange();
   };
 
+  if (!currentAudioDevice) return null;
   return (
     <div className="relative my-5">
       <div
@@ -38,10 +45,13 @@ export default function HostInfo({ onAudioDeviceChange }: HostInfoProps) {
         <div className="flex w-full justify-between gap-12 items-center">
           <div className="flex flex-col gap-1">
             <span className="font-flify text-4xl font-bold">
-              Input device name
+              {currentAudioDevice.name}
             </span>
             <span className="ml-1 text-md text-slate-300">
-              x channels, xxxxx Hz, other info...
+              {currentAudioDevice.maxInputChannels} channel
+              {currentAudioDevice.maxInputChannels !== 1 ? "s" : ""},{" "}
+              {currentAudioDevice.defaultSampleRate} Hz,{" "}
+              {currentAudioDevice.hostAPIName}
             </span>
           </div>
           <button
@@ -70,7 +80,7 @@ export default function HostInfo({ onAudioDeviceChange }: HostInfoProps) {
         <div className="flex w-full justify-center gap-3 items-center text-flify">
           <MdDevices size={24} />
           {/* margin-top: -2px comes from the fact that the icon is not ideally centered - I measured it and it is around 2.5px too high above the center */}
-          <span className="text-2xl mt-[-3px]">Hostname</span>
+          <span className="text-2xl mt-[-3px]">{networkInfo!.hostname}</span>
         </div>
       </div>
     </div>

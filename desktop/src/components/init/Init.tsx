@@ -1,9 +1,11 @@
 import LoadingPage from "@/pages/Loading/LoadingPage";
 import { getConnectionInfo } from "@/services/connection/getConnectionInfo";
+import { audioDevice } from "@/state/connection/audioDevice.atom";
 import { connection } from "@/state/connection/connection.atom";
 import { sockets } from "@/state/connection/sockets.atom";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
+import { AudioDevice } from "types/audio.types";
 import { Client } from "types/socket.types";
 const { ipcRenderer } = require("electron");
 
@@ -14,6 +16,8 @@ export default function Init({ children }: InitProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [connectionInfo, setConnectionInfo] = useRecoilState(connection);
   const [socketList, setSocketList] = useRecoilState(sockets);
+  const [currentAudioDevice, setCurrentAudioDevice] =
+    useRecoilState(audioDevice);
 
   const initApp = async () => {
     const info = await getConnectionInfo();
@@ -24,6 +28,11 @@ export default function Init({ children }: InitProps) {
     ipcRenderer.on("socket/list", (_, newSocketList: Client[]) => {
       console.log("Socket list updated!", newSocketList);
       setSocketList(newSocketList);
+    });
+
+    ipcRenderer.on("audio/device", (_, newDevice: AudioDevice | null) => {
+      console.log("Audio device updated!", newDevice);
+      setCurrentAudioDevice(newDevice);
     });
   };
 

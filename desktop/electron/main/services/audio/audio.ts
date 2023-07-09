@@ -1,25 +1,9 @@
-import portAudio, { DeviceInfo } from "naudiodon";
+import portAudio from "naudiodon";
 import { io } from "../socket";
 import cuid from "cuid";
 import { updateChannelsVolume } from "../api/volume/updateVolume";
-
-export type Session = {
-  id: string;
-  params: AudioParams;
-  selectedAudioDevice: AudioDevice;
-};
-export type AudioDevice = DeviceInfo;
-
-export type AudioParams = {
-  channelCount: number;
-  sampleRate: number;
-};
-
-export type AudioPayload = {
-  d: any; // Data
-  i: string; // Id
-  t: Date; // Timestamp
-};
+import { AudioPayload, Session } from "../../../../types/audio.types";
+import { updateCurrentAudioDevice } from "../api/audio/updateCurrentAudioDevice";
 
 export let ai: portAudio.IoStreamRead | null = null;
 export let session: Session | null = null;
@@ -44,7 +28,7 @@ function calculateVolume(samples: Int16Array) {
   return rms;
 }
 
-async function processData(data: any) {
+async function processData(data: Buffer) {
   // Volume per channel
   const bytesPerSample = 2; // 16-bit PCM
   const samplesPerChannel = data.length / bytesPerSample / 2; // 2 channels (stereo)
@@ -84,6 +68,8 @@ export async function initPortaudio(deviceId: number) {
   if (!device) {
     console.error("Device not found on init, using default...");
   }
+
+  updateCurrentAudioDevice(device!);
 
   ai = portAudio.AudioIO({
     inOptions: {
@@ -133,6 +119,8 @@ export function stopPortaudio() {
 
   session = null;
   ai = null;
+
+  updateCurrentAudioDevice(null);
 }
 
 export function startWithDefault() {
