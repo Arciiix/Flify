@@ -1,18 +1,33 @@
 import { getMute, getVolume } from "easy-volume";
 import { win } from "../../../index";
 import { CurrentVolumeState } from "types/audio.types";
+import { dialog } from "electron";
 
-export default async function getAudioVolume(): Promise<CurrentVolumeState> {
-  // TODO: Add error handling
-  const volume = await getVolume();
-  const muteStatus = await getMute();
+let alreadyShowedWarning = false;
 
-  const newState = {
-    volume,
-    isMuted: muteStatus,
-  } satisfies CurrentVolumeState;
+export default async function getAudioVolume(): Promise<CurrentVolumeState | null> {
+  try {
+    const volume = await getVolume();
+    const muteStatus = await getMute();
 
-  win!.webContents.send("audio/volumeUpdate", newState);
+    const newState = {
+      volume,
+      isMuted: muteStatus,
+    } satisfies CurrentVolumeState;
 
-  return newState;
+    win!.webContents.send("audio/volumeUpdate", newState);
+
+    return newState;
+  } catch (err) {
+    if (!alreadyShowedWarning) {
+      dialog.showMessageBox(win!, {
+        type: "error",
+        title: "Flify",
+        message:
+          "Oh no! Couldn't get current volume. Those warnings won't appear anymore so that you can use the app, just without the control of the host volume.",
+      });
+      alreadyShowedWarning = true;
+    }
+    return null;
+  }
 }
