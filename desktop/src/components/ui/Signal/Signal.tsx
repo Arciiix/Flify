@@ -28,7 +28,9 @@ export default function Signal({ latency }: SignalProps) {
       className={`signal-strength-${signalStrength} fill-blue-400 flex flex-col items-center`}
     >
       <SignalSvg width={36} height={36} />
-      <span className="text-blue-400 font-bold text-xl">{latency} ms</span>
+      <span className="text-blue-400 font-bold text-xl">
+        {latency === -1 ? "-" : latency} ms
+      </span>
     </div>
   );
 }
