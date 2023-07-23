@@ -17,3 +17,8 @@ export type AudioPayload = {
   i: string; // Id
   t: Date; // Timestamp
 };
+
+export type CurrentVolumeState = {
+  volume: number;
+  isMuted: boolean;
+};

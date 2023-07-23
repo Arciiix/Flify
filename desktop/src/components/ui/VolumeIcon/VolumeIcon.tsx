@@ -4,15 +4,21 @@ import {
   MdAllInclusive,
   MdVolumeDown,
   MdVolumeMute,
+  MdVolumeOff,
   MdVolumeUp,
 } from "react-icons/md";
 
 interface VolumeIconProps {
+  isMuted?: boolean | null;
   volume: number;
 }
 
-export default function VolumeIcon({ volume }: VolumeIconProps) {
+export default function VolumeIcon({ volume, isMuted }: VolumeIconProps) {
   const Icon: IconType = useMemo(() => {
+    if (isMuted) {
+      return MdVolumeOff;
+    }
+
     // We've got 4 icons, so 4 levels
     if (volume === 0) {
       return MdVolumeMute;
@@ -23,7 +29,7 @@ export default function VolumeIcon({ volume }: VolumeIconProps) {
     } else {
       return MdVolumeUp;
     }
-  }, [volume]);
+  }, [volume, isMuted]);
 
   return <Icon size={32} />;
 }

@@ -1,8 +1,9 @@
-import { app, BrowserWindow, shell, ipcMain } from "electron";
+import { BrowserWindow, app, ipcMain, shell } from "electron";
 import { release } from "node:os";
 import { join } from "node:path";
 import handleInternalAPI from "./services/api";
 import initSocket from "./services/socket";
+import getAudioVolume from "./services/api/audio/getAudioVolume";
 
 // The built directory structure
 //
@@ -78,6 +79,11 @@ async function createWindow() {
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith("https:")) shell.openExternal(url);
     return { action: "deny" };
+  });
+
+  // When window gets focus, re-fetch the system volume (so it's up-to-date)
+  win.on("focus", () => {
+    getAudioVolume();
   });
 
   // Init all the services
