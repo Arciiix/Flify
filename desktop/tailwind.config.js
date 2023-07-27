@@ -22,6 +22,9 @@ module.exports = {
           "sans-serif",
         ],
       },
+      animation: {
+        update: "pulse 0.2s linear",
+      },
     },
   },
   plugins: [],

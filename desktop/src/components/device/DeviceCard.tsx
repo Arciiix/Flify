@@ -26,6 +26,7 @@ export default function DeviceCard({ device }: DeviceCardProps) {
 
   const [uptime, setUptime] = useState(0);
   const [isConfirmingDisconnect, setIsConfirmingDisconnect] = useState(false);
+  const [hasUpdated, setHasUpdated] = useState(false); // Used for update indication animation
 
   const uptimeString = useMemo(() => {
     return secondsToFormattedTime(uptime);
@@ -71,8 +72,24 @@ export default function DeviceCard({ device }: DeviceCardProps) {
     };
   }, [device.state, volume]);
 
+  useEffect(() => {
+    setHasUpdated(true);
+
+    const timeout = setTimeout(() => {
+      setHasUpdated(false);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [device.state]);
+
   return (
-    <div className="flex flex-col bg-flify bg-opacity-20 p-4 m-6 rounded-xl min-w-[28rem] max-w-lg items-center gap-2">
+    <div
+      className={`flex flex-col bg-flify bg-opacity-20 p-4 m-6 rounded-xl min-w-[28rem] max-w-lg items-center gap-2 ${
+        hasUpdated ? "animate-update" : ""
+      }`}
+    >
       <Modal
         isOpen={isConfirmingDisconnect}
         onClose={closeDisconnectConfirmation}

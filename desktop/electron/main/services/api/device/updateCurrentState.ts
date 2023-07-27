@@ -10,7 +10,11 @@ export function updateCurrentState(
     console.log(`Didn't find device ${socketId} when updating state!`);
   }
 
-  device!.state = { ...device!.state, ...(newState as DeviceState) };
+  device!.state = {
+    ...device!.state,
+    ...(newState as DeviceState),
+    updatedAt: new Date(),
+  };
 
   // Send updated device with the 'socket' property
   const { socket, ...updatedDevice } = device!;

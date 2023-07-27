@@ -12,6 +12,7 @@ export interface DeviceState {
   batteryLevel: number;
   volume: number;
   ping: number;
+  updatedAt?: Date;
 }
 
 export type DeviceStateUpdate = Partial<DeviceState>;
