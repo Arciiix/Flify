@@ -13,6 +13,8 @@ import { channelsVolume } from "@/state/volume/channels.atom";
 
 import "../../styles/scrollbar.css";
 import { ChannelsVolume } from "types/volume.types";
+import { MdRefresh } from "react-icons/md";
+import reconnectDevices from "@/services/connection/reconnectDevices";
 const { ipcRenderer } = require("electron");
 
 export default function AppPage() {
@@ -66,9 +68,16 @@ export default function AppPage() {
       </div>
 
       <div>
-        <div className="flex w-full justify-center">
+        <div className="flex w-max mx-auto justify-center items-center">
           <span className="font-flify text-4xl">Devices</span>
-          <span>{deviceList.length}</span>
+          <span className="mb-auto">{deviceList.length}</span>
+          <div
+            className="flex flex-1 items-center justify-center ml-2 transition-all hover:rotate-45 active:rotate-90 hover:text-blue-100 active:text-blue-200 cursor-pointer"
+            title="Reconnect devices to fix latency issues"
+            onClick={reconnectDevices}
+          >
+            <MdRefresh size={32} />
+          </div>
         </div>
         <div className="flex w-[calc(100vw-20px)] px-2 overflow-x-auto">
           {deviceList.map((e) => {

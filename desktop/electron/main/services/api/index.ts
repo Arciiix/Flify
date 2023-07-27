@@ -7,11 +7,13 @@ import changeAudioDevice from "./audio/changeAudioDevice";
 import changeDeviceVolume from "./device/changeDeviceVolume";
 import getAudioVolume from "./audio/getAudioVolume";
 import setAudioVolume from "./audio/setAudioVolume";
+import reconnectSockets from "./socket/reconnectSockets";
 
 export default function handleInternalAPI() {
   ipcMain.handle("network/info", getNetworkInfo);
   ipcMain.handle("qrcode/raw", getQRCodeText);
   ipcMain.handle("device/disconnect", disconnectSocket);
+  ipcMain.handle("device/reconnectAll", reconnectSockets);
   ipcMain.handle("audio/all", getAllAudioDevices);
   ipcMain.handle("audio/change", changeAudioDevice);
   ipcMain.handle("audio/getVolume", getAudioVolume);

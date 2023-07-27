@@ -43,6 +43,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   late final IO.Socket socket;
 
   late String remoteDeviceName;
+  late String displayedName;
 
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
@@ -115,6 +116,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
 
     setState(() {
       remoteDeviceName = newName;
+      displayedName = newName;
     });
   }
 
@@ -133,6 +135,8 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     });
     socket.onConnect((_) async {
       if (!mounted) return;
+
+      displayedName = widget.name;
 
       print("Successfully connnected to the socket!");
 
@@ -230,6 +234,14 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         player = null;
         _currentSession = null;
       });
+    });
+
+    socket.on("reconnect", (_) {
+      print("Reconnect");
+      if (mounted) {
+        context.replace(
+            "/reconnect?ip=${widget.ip}&port=${widget.port}&name=${widget.name}");
+      }
     });
 
     socket.onConnectError((data) {

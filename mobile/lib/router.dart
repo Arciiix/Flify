@@ -38,6 +38,15 @@ final router = GoRouter(
             port: state.queryParameters["port"]!,
             name: state.queryParameters["name"]!,
           );
+        }),
+    GoRoute(
+        path: "/reconnect",
+        builder: (context, state) {
+          return HomeScreen(
+              ip: state.queryParameters["ip"],
+              port: state.queryParameters["port"],
+              name: state.queryParameters["name"],
+              reconnect: true);
         })
   ],
 );
