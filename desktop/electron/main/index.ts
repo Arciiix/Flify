@@ -89,6 +89,9 @@ async function createWindow() {
   // Init all the services
   initSocket();
   handleInternalAPI();
+
+  // Ask for notifications permission
+  Notification.requestPermission();
 }
 
 app.whenReady().then(createWindow);
