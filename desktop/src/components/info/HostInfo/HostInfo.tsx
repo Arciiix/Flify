@@ -1,14 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
-import { MdDevices, MdOutlineSpeaker } from "react-icons/md";
+import {
+  MdDevices,
+  MdOutlineNotStarted,
+  MdOutlineSpeaker,
+  MdSkipNext,
+  MdSkipPrevious,
+} from "react-icons/md";
 
 import Slider from "@/components/ui/Slider/Slider";
-import styles from "./HostInfo.module.css";
 import VolumeIcon from "@/components/ui/VolumeIcon/VolumeIcon";
+import setAudioVolume from "@/services/audio/setAudioVolume";
+import { currentVolume } from "@/state/audio/currentVolume.atom";
+import { audioDevice } from "@/state/connection/audioDevice.atom";
 import { connection } from "@/state/connection/connection.atom";
 import { useRecoilValue } from "recoil";
-import { audioDevice } from "@/state/connection/audioDevice.atom";
-import { currentVolume } from "@/state/audio/currentVolume.atom";
-import setAudioVolume from "@/services/audio/setAudioVolume";
+import styles from "./HostInfo.module.css";
+import previousTrack from "@/services/playback/previousTrack";
+import togglePlayback from "@/services/playback/togglePlayback";
+import nextTrack from "@/services/playback/nextTrack";
 
 interface HostInfoProps {
   onAudioDeviceChange: () => void;
@@ -68,6 +77,11 @@ export default function HostInfo({ onAudioDeviceChange }: HostInfoProps) {
         className={`w-full absolute top-0 h-full rounded-full bg-flify bg-opacity-30 blur-2xl block ${styles.bg}`}
       ></div>
       <div className={`flex flex-col p-6 rounded-xl gap-3 ${styles.wrapper}`}>
+        <div className="flex justify-center gap-7 px-2 [&>*]:transition-colors [&>*:hover]:text-flify [&>*:hover]:cursor-pointer">
+          <MdSkipPrevious size={64} onClick={previousTrack} />
+          <MdOutlineNotStarted size={64} onClick={togglePlayback} />
+          <MdSkipNext size={64} onClick={nextTrack} />
+        </div>
         <div className="flex w-full justify-between gap-12 items-center">
           <div className="flex flex-col gap-1">
             <span className="font-flify text-4xl font-bold">

@@ -44,6 +44,7 @@ const url = process.env.VITE_DEV_SERVER_URL;
 const indexHtml = join(process.env.DIST, "index.html");
 
 async function createWindow() {
+  console.log(`Runtime version: ${process.version}`);
   win = new BrowserWindow({
     title: "Flify",
     icon: join(process.env.PUBLIC, "icons", "favicon.ico"),
@@ -89,9 +90,6 @@ async function createWindow() {
   // Init all the services
   initSocket();
   handleInternalAPI();
-
-  // Ask for notifications permission
-  Notification.requestPermission();
 }
 
 app.whenReady().then(createWindow);

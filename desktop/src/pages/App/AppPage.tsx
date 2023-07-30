@@ -15,6 +15,9 @@ import "../../styles/scrollbar.css";
 import { ChannelsVolume } from "types/volume.types";
 import { MdRefresh } from "react-icons/md";
 import reconnectDevices from "@/services/connection/reconnectDevices";
+import togglePlayback from "@/services/playback/togglePlayback";
+import previousTrack from "@/services/playback/previousTrack";
+import nextTrack from "@/services/playback/nextTrack";
 const { ipcRenderer } = require("electron");
 
 export default function AppPage() {
@@ -39,6 +42,7 @@ export default function AppPage() {
   }, [deviceList]);
 
   useEffect(() => {
+    // Update the indicator with the channel volumes
     const handleChannelsVolume = (
       _event: Electron.IpcRendererEvent,
       value: ChannelsVolume
@@ -47,8 +51,29 @@ export default function AppPage() {
     };
     ipcRenderer.on("channels/volume", handleChannelsVolume);
 
+    // Add a keystroke to toggle the playback state (puase/play)
+    const handleTogglePlayback = (event: KeyboardEvent) => {
+      switch (event.code.toLowerCase()) {
+        case "space":
+          event.preventDefault();
+          togglePlayback();
+          break;
+        case "arrowleft":
+          event.preventDefault();
+          previousTrack();
+          break;
+        case "arrowright":
+          event.preventDefault();
+          nextTrack();
+          break;
+      }
+    };
+    document.addEventListener("keyup", handleTogglePlayback);
+
     return () => {
+      // Clear after listeners
       ipcRenderer.removeListener("channels/volume", handleChannelsVolume);
+      document.removeEventListener("keyup", handleTogglePlayback);
     };
   }, []);
   return (
