@@ -38,9 +38,10 @@ class Flify extends StatelessWidget {
     return MaterialApp.router(
       title: 'Flify',
       theme: ThemeData(
-        colorScheme: const ColorScheme.dark(primary: flifyColor),
-        useMaterial3: true,
-      ),
+          colorScheme: const ColorScheme.dark(primary: flifyColor),
+          useMaterial3: true,
+          sliderTheme:
+              SliderThemeData(overlayShape: SliderComponentShape.noOverlay)),
       routerConfig: router,
     );
   }

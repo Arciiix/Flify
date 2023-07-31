@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:battery_info/battery_info_plugin.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flify/components/player/player_ui.dart';
 import 'package:flify/components/ui/animated_logo_transition.dart';
 import 'package:flify/components/ui/loading.dart';
+import 'package:flify/providers/battery.dart';
 import 'package:flify/providers/network_info.dart';
 import 'package:flify/providers/notifications.dart';
 import 'package:flify/providers/recent_devices.dart';
+import 'package:flify/providers/self_volume.dart';
 import 'package:flify/providers/socket.dart';
 import 'package:flify/types/navigation_state.dart';
 import 'package:flify/types/recent_device.dart';
@@ -60,8 +64,8 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
 
   bool _isError = false;
 
-  late double selfVolume;
-  late int batteryLevel;
+  late StreamSubscription selfVolumeSubscription;
+  late StreamSubscription batteryLevelSubscription;
 
   int currentReconnectIndex = 0;
 
@@ -161,22 +165,13 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       print("Successfully connnected to the socket!");
 
       // Listen to volume change
-      VolumeController().listener((volume) {
-        setState(() => selfVolume = volume);
-        socket.emit("update_volume", volume);
+      selfVolumeSubscription = ref.read(selfVolumeProvider).listen((value) {
+        socket.emit("update_volume", value);
       });
 
       // Listen to battery level change
-      BatteryInfoPlugin().androidBatteryInfoStream.listen((event) {
-        setState(() {
-          batteryLevel = event?.batteryLevel ?? 0;
-        });
-        socket.emit("update_battery", batteryLevel);
-      });
-      BatteryInfoPlugin().iosBatteryInfoStream.listen((event) {
-        setState(() {
-          batteryLevel = event?.batteryLevel ?? 0;
-        });
+      batteryLevelSubscription =
+          ref.read(batteryProvider).listen((batteryLevel) {
         socket.emit("update_battery", batteryLevel);
       });
 
@@ -223,9 +218,9 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         print("Received data not in the session, return...");
         return;
       }
-      print("DATA!");
+      // print("DATA!");
       player!.foodSink!.add(FoodData(payload['d']));
-      print("added to player");
+      // print("added to player");
 
       // If the time has come, also send the heartbeat
       if (DateTime.now().difference(lastHeartbeat).inSeconds > 5) {
@@ -403,7 +398,8 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       return SafeArea(
         child: Scaffold(
             key: _scaffoldKey,
-            body: const Column(children: [AnimatedLogoTransition()])),
+            body: Column(
+                children: [const AnimatedLogoTransition(), MusicPlayer()])),
       );
     }
   }
@@ -415,7 +411,8 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     socket.dispose();
 
     localNotifications.cancel(NOTIFICATION_ID);
-    VolumeController().removeListener();
+    selfVolumeSubscription.cancel();
+    batteryLevelSubscription.cancel();
 
     super.dispose();
   }

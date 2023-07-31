@@ -49,6 +49,7 @@ dependencies:
   flutter_local_notifications: ^15.1.0+1
   volume_controller: ^2.0.7
   battery_info: ^1.1.1
+  rxdart: ^0.27.7
 
 dev_dependencies:
   flutter_test:

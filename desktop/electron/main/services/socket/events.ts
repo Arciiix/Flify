@@ -77,7 +77,7 @@ export default function handleSocketConnection(socket: Socket) {
 
   socket.on("update_volume", (volume: number) => {
     updateCurrentState(socket.id, {
-      volume: Math.round(volume * 100),
+      volume: volume,
     });
   });
   socket.on("update_battery", (batteryLevel: number) => {
