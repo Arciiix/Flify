@@ -73,7 +73,7 @@ class _VolumeSliderState extends State<VolumeSlider> {
         Row(
           children: [
             IconButton(
-              icon: Icon(getIconForVolume(), size: 24),
+              icon: Icon(getIconForVolume(), size: 24, color: Colors.white),
               onPressed: widget.onMuteChange != null
                   ? () => widget.onMuteChange!(!(widget.isMuted ?? false))
                   : null,
@@ -95,8 +95,8 @@ class _VolumeSliderState extends State<VolumeSlider> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 10),
                           child: SizedBox(
                             child: Text("0%"),
                             width: 50,
@@ -108,8 +108,8 @@ class _VolumeSliderState extends State<VolumeSlider> {
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             )),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 10),
+                        const Padding(
+                          padding: EdgeInsets.only(right: 10),
                           child: SizedBox(
                             child: Text(
                               "100%",

@@ -13,6 +13,9 @@ import { Notification } from "electron";
 import { CurrentVolumeState } from "types/audio.types";
 import setAudioVolume from "../api/audio/setAudioVolume";
 import getAudioVolume from "../api/audio/getAudioVolume";
+import togglePlayback from "../api/playback/togglePlayback";
+import previousTrack from "../api/playback/previousTrack";
+import nextTrack from "../api/playback/nextTrack";
 
 export let connectedSockets: Client[] = [];
 
@@ -67,6 +70,10 @@ export default function handleSocketConnection(socket: Socket) {
   socket.on("change_host_volume", (newVolume: CurrentVolumeState) => {
     setAudioVolume(null, newVolume);
   });
+
+  socket.on("playback_toggle", togglePlayback);
+  socket.on("playback_previous", previousTrack);
+  socket.on("playback_next", nextTrack);
 
   socket.on("data_heartbeat", (dataHeartbeat: DataHeartbeat) => {
     // Used to measure the latency and whether the device is still connected

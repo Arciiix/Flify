@@ -47,6 +47,18 @@ class MusicPlayerState extends ConsumerState<MusicPlayer> {
     VolumeController().setVolume(newVolume / 100.0);
   }
 
+  void playbackPrevious() {
+    ref.read(socketProvider)!.emit("playback_previous");
+  }
+
+  void playbackToggle() {
+    ref.read(socketProvider)!.emit("playback_toggle");
+  }
+
+  void playbackNext() {
+    ref.read(socketProvider)!.emit("playback_next");
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen(currentInfoProvider, (previous, next) {
@@ -88,7 +100,7 @@ class MusicPlayerState extends ConsumerState<MusicPlayer> {
                 color: Theme.of(context).colorScheme.primary,
               ),
               iconSize: 60,
-              onPressed: () {},
+              onPressed: playbackPrevious,
             ),
             IconButton(
               icon: Container(
@@ -120,7 +132,7 @@ class MusicPlayerState extends ConsumerState<MusicPlayer> {
                 ]),
               ),
               iconSize: 90,
-              onPressed: () {},
+              onPressed: playbackToggle,
             ),
             IconButton(
               icon: Icon(
@@ -128,7 +140,7 @@ class MusicPlayerState extends ConsumerState<MusicPlayer> {
                 color: Theme.of(context).colorScheme.primary,
               ),
               iconSize: 60,
-              onPressed: () {},
+              onPressed: playbackNext,
             ),
           ],
         ),
