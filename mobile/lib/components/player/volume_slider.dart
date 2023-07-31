@@ -6,7 +6,9 @@ class VolumeSlider extends StatefulWidget {
   int volume;
   String? title;
   bool? isMuted;
-  void Function(int newVolume) onVolumeChange;
+  void Function(
+    int newVolume,
+  ) onVolumeChange;
   void Function(bool muted)? onMuteChange;
 
   VolumeSlider(
@@ -32,8 +34,8 @@ class _VolumeSliderState extends State<VolumeSlider> {
 
     debounce?.cancel();
     // Add debounce to update the parent component
-    debounce = Timer(
-        Duration(milliseconds: 300), () => widget.onVolumeChange(localVolume));
+    debounce = Timer(const Duration(milliseconds: 300),
+        () => widget.onVolumeChange(localVolume));
   }
 
   IconData getIconForVolume() {
@@ -57,7 +59,9 @@ class _VolumeSliderState extends State<VolumeSlider> {
   @override
   void didUpdateWidget(old) {
     super.didUpdateWidget(old);
-    localVolume = widget.volume;
+    setState(() {
+      localVolume = widget.volume;
+    });
   }
 
   @override

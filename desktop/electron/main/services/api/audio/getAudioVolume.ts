@@ -2,6 +2,7 @@ import { getMute, getVolume } from "easy-volume";
 import { win } from "../../../index";
 import { CurrentVolumeState } from "types/audio.types";
 import { dialog } from "electron";
+import { connectedSockets } from "../../socket/events";
 
 let alreadyShowedWarning = false;
 
@@ -16,6 +17,11 @@ export default async function getAudioVolume(): Promise<CurrentVolumeState | nul
     } satisfies CurrentVolumeState;
 
     win!.webContents.send("audio/volumeUpdate", newState);
+
+    // Also send update to all sockets
+    connectedSockets.forEach((e) =>
+      e.socket?.emit("host_volume_update", newState)
+    );
 
     return newState;
   } catch (err) {

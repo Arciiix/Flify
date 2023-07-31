@@ -13,6 +13,7 @@ class Metadata {
 class Session {
   String? id;
   AudioParams? params;
+  String? audioDeviceName;
 }
 
 class AudioParams {

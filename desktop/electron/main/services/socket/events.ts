@@ -10,6 +10,9 @@ import { getHostname } from "../network/getNetworkData";
 import { session, startWithDefault, stopPortaudio } from "../audio/audio";
 import { updateCurrentState } from "../api/device/updateCurrentState";
 import { Notification } from "electron";
+import { CurrentVolumeState } from "types/audio.types";
+import setAudioVolume from "../api/audio/setAudioVolume";
+import getAudioVolume from "../api/audio/getAudioVolume";
 
 export let connectedSockets: Client[] = [];
 
@@ -52,10 +55,17 @@ export default function handleSocketConnection(socket: Socket) {
       hostname,
     } satisfies WorldPayload); // Reply event to the "hello" initial event
 
+    // Send the current volume
+    getAudioVolume();
+
     // If there's an audio session, send init event
     if (session) {
       socket.emit("init", session);
     }
+  });
+
+  socket.on("change_host_volume", (newVolume: CurrentVolumeState) => {
+    setAudioVolume(null, newVolume);
   });
 
   socket.on("data_heartbeat", (dataHeartbeat: DataHeartbeat) => {

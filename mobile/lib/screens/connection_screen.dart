@@ -11,6 +11,7 @@ import 'package:flify/providers/notifications.dart';
 import 'package:flify/providers/recent_devices.dart';
 import 'package:flify/providers/self_volume.dart';
 import 'package:flify/providers/socket.dart';
+import 'package:flify/types/current_info.dart';
 import 'package:flify/types/navigation_state.dart';
 import 'package:flify/types/recent_device.dart';
 import 'package:flify/types/socket.dart';
@@ -24,6 +25,7 @@ import 'package:isar/isar.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:volume_controller/volume_controller.dart';
 
+import '../providers/current_info.dart';
 import '../providers/isar_service.dart';
 
 const NOTIFICATION_ID = 0;
@@ -131,6 +133,8 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     setState(() {
       remoteDeviceName = newName;
       displayedName = newName;
+      ref.read(currentInfoProvider.notifier).state =
+          ref.read(currentInfoProvider).copyWith(hostname: displayedName);
     });
   }
 
@@ -145,6 +149,9 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   }
 
   void initSocketConnection(Metadata metadata) {
+    // Create a new info object
+    ref.read(currentInfoProvider.notifier).state = CurrentInfo();
+
     // TODO: Think about migrating to HTTPS
     socket = IO.io('http://${widget.ip}:${widget.port}', <String, dynamic>{
       'transports': ['websocket'],
@@ -192,7 +199,8 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
           ..id = session['id']
           ..params = (AudioParams()
             ..channelCount = session['params']['channelCount']
-            ..sampleRate = session['params']['sampleRate']);
+            ..sampleRate = session['params']['sampleRate'])
+          ..audioDeviceName = session?["selectedAudioDevice"]?["name"];
         player = FlutterSoundPlayer();
         currentReconnectIndex = 0;
       });
@@ -206,6 +214,11 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
           sampleRate: _currentSession!.params!.sampleRate!);
 
       print("INIT FINISH  ${_currentSession!.id}!");
+
+      ref.read(currentInfoProvider.notifier).state = ref
+          .read(currentInfoProvider)
+          .copyWith(audioDeviceName: _currentSession?.audioDeviceName);
+
       showNotification();
     });
 
@@ -238,6 +251,12 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       int newVolume = int.tryParse(volume.toString()) ?? 100;
       print("Change volume to $newVolume");
       VolumeController().setVolume(newVolume / 100);
+    });
+
+    socket.on("host_volume_update", (volumeState) {
+      ref.read(currentInfoProvider.notifier).state = ref
+          .read(currentInfoProvider)
+          .copyWith(volume: VolumeState.fromPayload(volumeState));
     });
 
     socket.on("stop", (session) {
@@ -321,6 +340,9 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
               label: "Update", onPressed: () => updateName(data['hostname'])),
         ));
       }
+
+      ref.read(currentInfoProvider.notifier).state =
+          ref.read(currentInfoProvider).copyWith(hostname: displayedName);
 
       setState(() {
         _loadingState = null;

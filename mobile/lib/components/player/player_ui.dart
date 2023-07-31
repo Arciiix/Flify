@@ -1,5 +1,8 @@
 import 'package:flify/components/player/volume_slider.dart';
+import 'package:flify/providers/current_info.dart';
 import 'package:flify/providers/self_volume.dart';
+import 'package:flify/providers/socket.dart';
+import 'package:flify/types/current_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:volume_controller/volume_controller.dart';
@@ -11,14 +14,15 @@ class MusicPlayer extends ConsumerStatefulWidget {
 
 class MusicPlayerState extends ConsumerState<MusicPlayer> {
   late int localHostVolume;
-  int localDeviceVolume = 0;
+  late bool hostIsMuted;
+  late int localDeviceVolume = 0;
 
   @override
   void initState() {
     super.initState();
 
-    // TODO
-    localHostVolume = 0;
+    localHostVolume = ref.read(currentInfoProvider).volume?.volume ?? 0;
+    hostIsMuted = ref.read(currentInfoProvider).volume?.isMuted ?? false;
 
     ref.read(selfVolumeProvider).listen((vol) {
       setState(() {
@@ -28,7 +32,15 @@ class MusicPlayerState extends ConsumerState<MusicPlayer> {
   }
 
   void onHostVolumeChange(int newVolume) {
-    print("host vol to $newVolume");
+    ref
+        .read(socketProvider)!
+        .emit("change_host_volume", VolumeState(newVolume, hostIsMuted));
+  }
+
+  void onHostMuteChange(bool isMuted) {
+    ref
+        .read(socketProvider)!
+        .emit("change_host_volume", VolumeState(localHostVolume, isMuted));
   }
 
   void onDeviceVolumeChange(int newVolume) {
@@ -37,6 +49,13 @@ class MusicPlayerState extends ConsumerState<MusicPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(currentInfoProvider, (previous, next) {
+      setState(() {
+        localHostVolume = next.volume?.volume ?? 0;
+        hostIsMuted = next.volume?.isMuted ?? false;
+      });
+    });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -49,9 +68,12 @@ class MusicPlayerState extends ConsumerState<MusicPlayer> {
         Text('IP address', style: TextStyle(fontSize: 18)),
         const SizedBox(height: 10),
         VolumeSlider(
-            title: "Host volume",
-            volume: localHostVolume,
-            onVolumeChange: onHostVolumeChange),
+          title: "Host volume",
+          volume: localHostVolume,
+          isMuted: hostIsMuted,
+          onVolumeChange: onHostVolumeChange,
+          onMuteChange: onHostMuteChange,
+        ),
         VolumeSlider(
             title: "Local volume",
             volume: localDeviceVolume,
