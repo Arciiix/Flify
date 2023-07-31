@@ -420,8 +420,15 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
       return SafeArea(
         child: Scaffold(
             key: _scaffoldKey,
-            body: Column(
-                children: [const AnimatedLogoTransition(), MusicPlayer()])),
+            body: Center(
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const AnimatedLogoTransition(),
+                MusicPlayer(
+                  hostName: displayedName,
+                  ip: widget.ip,
+                )
+              ]),
+            )),
       );
     }
   }

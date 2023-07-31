@@ -8,6 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:volume_controller/volume_controller.dart';
 
 class MusicPlayer extends ConsumerStatefulWidget {
+  final String hostName;
+  final String ip;
+
+  const MusicPlayer({super.key, required this.hostName, required this.ip});
+
   @override
   MusicPlayerState createState() => MusicPlayerState();
 }
@@ -61,6 +66,8 @@ class MusicPlayerState extends ConsumerState<MusicPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    CurrentInfo info = ref.watch(currentInfoProvider);
+
     ref.listen(currentInfoProvider, (previous, next) {
       setState(() {
         localHostVolume = next.volume?.volume ?? 0;
@@ -71,13 +78,26 @@ class MusicPlayerState extends ConsumerState<MusicPlayer> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: 30),
+        const SizedBox(height: 30),
+        Text(widget.hostName,
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center),
         Text(
-          'Device name',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          widget.ip,
+          style: TextStyle(fontSize: 14, color: Colors.grey[200]),
+          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 10),
-        Text('IP address', style: TextStyle(fontSize: 18)),
+        Text(
+          info.audioDeviceName ?? "Audio",
+          style: const TextStyle(fontSize: 18),
+          softWrap: false,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: 10),
         VolumeSlider(
           title: "Host volume",

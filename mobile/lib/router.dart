@@ -36,10 +36,13 @@ final router = GoRouter(
           return null;
         },
         builder: (context, state) {
-          ConnectionScreenNavigationState params =
-              state.extra as ConnectionScreenNavigationState;
+          ConnectionScreenNavigationState? params =
+              state.extra as ConnectionScreenNavigationState?;
+          if (params == null) {
+            context.replace("/");
+          }
           return ConnectionScreen(
-              ip: params.ip!,
+              ip: params!.ip!,
               port: params.port!,
               name: params.name!,
               currentReconnectIndex: params.currentReconnectIndex);
@@ -55,11 +58,15 @@ final router = GoRouter(
           return null;
         },
         builder: (context, state) {
-          ReconnectScreenNavigationState params =
-              state.extra as ReconnectScreenNavigationState;
+          ReconnectScreenNavigationState? params =
+              state.extra as ReconnectScreenNavigationState?;
+
+          if (params == null) {
+            context.replace("/");
+          }
 
           return ReconnectScreen(
-              ip: params.ip!,
+              ip: params!.ip!,
               port: params.port!,
               name: params.name!,
               currentReconnectIndex: params.currentReconnectIndex);
