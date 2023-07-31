@@ -12,11 +12,11 @@ import getAudioVolume from "./services/api/audio/getAudioVolume";
 // │ │ └── index.js    > Electron-Main
 // │ └─┬ preload
 // │   └── index.js    > Preload-Scripts
-// ├─┬ dist
+// ├─┬ dist-frontend
 // │ └── index.html    > Electron-Renderer
 //
 process.env.DIST_ELECTRON = join(__dirname, "../");
-process.env.DIST = join(process.env.DIST_ELECTRON, "../dist");
+process.env.DIST = join(process.env.DIST_ELECTRON, "../dist-frontend");
 process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
   ? join(process.env.DIST_ELECTRON, "../public")
   : process.env.DIST;
@@ -70,6 +70,8 @@ async function createWindow() {
   } else {
     win.loadFile(indexHtml);
   }
+
+  win.webContents.openDevTools();
 
   // Test actively push message to the Electron-Renderer
   win.webContents.on("did-finish-load", () => {

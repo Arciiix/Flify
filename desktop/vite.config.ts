@@ -16,6 +16,9 @@ export default defineConfig(({ command }) => {
   const sourcemap = isServe || !!process.env.VSCODE_DEBUG;
 
   return {
+    build: {
+      outDir: "dist-frontend",
+    },
     resolve: {
       alias: {
         "@": path.join(__dirname, "src"),
