@@ -1,7 +1,6 @@
 import 'package:flify/components/connect/scan_qr_code.dart';
 import 'package:flify/screens/connection_screen.dart';
 import 'package:flify/screens/home_screen.dart';
-import 'package:flify/screens/reconnect_screen.dart';
 import 'package:flify/types/navigation_state.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -47,29 +46,5 @@ final router = GoRouter(
               name: params.name!,
               currentReconnectIndex: params.currentReconnectIndex);
         }),
-    GoRoute(
-        path: "/reconnect",
-        redirect: (context, state) {
-          ReconnectScreenNavigationState? params =
-              state.extra as ReconnectScreenNavigationState?;
-          if (params == null) {
-            return "/";
-          }
-          return null;
-        },
-        builder: (context, state) {
-          ReconnectScreenNavigationState? params =
-              state.extra as ReconnectScreenNavigationState?;
-
-          if (params == null) {
-            context.replace("/");
-          }
-
-          return ReconnectScreen(
-              ip: params!.ip!,
-              port: params.port!,
-              name: params.name!,
-              currentReconnectIndex: params.currentReconnectIndex);
-        })
   ],
 );

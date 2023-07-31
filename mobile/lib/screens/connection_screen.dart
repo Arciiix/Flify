@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'package:battery_info/battery_info_plugin.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flify/components/player/player_ui.dart';
@@ -54,7 +55,10 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   String? _loadingState = "Loading...";
-  late final IO.Socket socket;
+  late IO.Socket socket;
+  Timer? reconnectTimer;
+  Timer?
+      reconnectTextPeriodicTimer; // A timer to update the text of time until the reconnection
 
   late String remoteDeviceName;
   late String displayedName;
@@ -138,14 +142,53 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     });
   }
 
-  void reconnect(BuildContext c, {int? currentReconnectIndexOverride}) {
-    c.replace("/reconnect",
-        extra: ReconnectScreenNavigationState(
-            ip: widget.ip,
-            port: widget.port,
-            name: widget.name,
-            currentReconnectIndex:
-                currentReconnectIndexOverride ?? currentReconnectIndex + 1));
+  void reconnect({int? currentReconnectIndexOverride}) {
+    setState(() {
+      currentReconnectIndex += 1;
+      socket.disconnect();
+      socket.dispose();
+      player?.stopPlayer();
+
+      ref.read(socketProvider.notifier).state = null;
+
+      localNotifications.cancel(NOTIFICATION_ID);
+      selfVolumeSubscription.cancel();
+      batteryLevelSubscription.cancel();
+      reconnectTimer?.cancel();
+      reconnectTextPeriodicTimer?.cancel();
+      _loadingState = "Reconnecting...";
+      _currentSession = null;
+      player = null;
+    });
+
+    Duration duration = Duration(
+        // Exponential backoff duration - to not spam the server like crazy, but instead wait for some time
+        // Max waiting time is 1 minute (which is log2 60000 ~ 16 retries)
+        milliseconds:
+            min(((pow(2, (currentReconnectIndex - 1))) * 1000).floor(), 60000));
+    reconnectTimer = Timer(duration, initConnection);
+    DateTime targetDate = DateTime.now().add(duration);
+
+    reconnectTextPeriodicTimer =
+        Timer.periodic(const Duration(seconds: 1), (timer) {
+      Duration timeLeft = targetDate.difference(DateTime.now());
+
+      if (timeLeft.isNegative) {
+        setState(() {
+          _loadingState = 'Connecting...';
+        });
+        timer.cancel();
+        return;
+      }
+
+      // Format the remaining time as a string
+      // Show seconds because the time is max 1 minute
+
+      setState(() {
+        _loadingState =
+            'Reconnecting in ${timeLeft.inSeconds} second${timeLeft.inSeconds == 1 ? '' : 's'}...';
+      });
+    });
   }
 
   void initSocketConnection(Metadata metadata) {
@@ -273,9 +316,9 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
 
     socket.on("reconnect", (_) {
       print("Reconnect");
-      if (mounted) {
-        reconnect(context, currentReconnectIndexOverride: 1);
-      }
+
+      print("not mounted, do manual reconnect...");
+      reconnect();
     });
 
     socket.on("you_will_disconnect", (_) {
@@ -297,9 +340,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         _isError = true;
       });
 
-      if (mounted) {
-        reconnect(context);
-      }
+      reconnect();
     });
     socket.onConnectTimeout((data) {
       if (!mounted) return;
@@ -311,9 +352,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         _isError = true;
       });
 
-      if (mounted) {
-        reconnect(context);
-      }
+      reconnect();
     });
     socket.onDisconnect((data) {
       if (!mounted) return;
@@ -324,9 +363,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         //   "/",
         // );
 
-        if (mounted) {
-          reconnect(_scaffoldKey.currentContext!);
-        }
+        reconnect();
       }
     });
 
@@ -442,6 +479,8 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     localNotifications.cancel(NOTIFICATION_ID);
     selfVolumeSubscription.cancel();
     batteryLevelSubscription.cancel();
+    reconnectTimer?.cancel();
+    reconnectTextPeriodicTimer?.cancel();
 
     super.dispose();
   }

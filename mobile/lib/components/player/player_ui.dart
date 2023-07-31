@@ -30,9 +30,11 @@ class MusicPlayerState extends ConsumerState<MusicPlayer> {
     hostIsMuted = ref.read(currentInfoProvider).volume?.isMuted ?? false;
 
     ref.read(selfVolumeProvider).listen((vol) {
-      setState(() {
-        localDeviceVolume = vol;
-      });
+      if (mounted) {
+        setState(() {
+          localDeviceVolume = vol;
+        });
+      }
     });
   }
 

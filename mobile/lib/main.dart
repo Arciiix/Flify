@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flify/providers/notifications.dart';
 import 'package:flify/router.dart';
 import 'package:flify/providers/isar_service.dart';
@@ -17,6 +19,12 @@ void main() async {
   print("DB init");
 
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  if (Platform.isAndroid) {
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestPermission();
+  }
 
   print("Notifications init");
 
