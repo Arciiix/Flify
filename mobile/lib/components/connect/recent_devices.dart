@@ -1,5 +1,6 @@
 import 'package:flify/providers/isar_service.dart';
 import 'package:flify/providers/recent_devices.dart';
+import 'package:flify/types/navigation_state.dart';
 import 'package:flify/types/recent_device.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,8 +50,12 @@ class RecentDevicesState extends ConsumerState<RecentDevices> {
   }
 
   void connectToDevice(RecentDevice device) {
-    context.push(
-        "/connection?ip=${device.ip}&port=${device.port}&name=${device.name}");
+    context.push("/connection",
+        extra: ConnectionScreenNavigationState(
+          ip: device.ip,
+          port: device.port.toString(),
+          name: device.name,
+        ));
   }
 
   Future<void> changeName(RecentDevice device) async {

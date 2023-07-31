@@ -1,6 +1,7 @@
 import 'package:flify/components/connect/scan_qr_code.dart';
 import 'package:flify/screens/connection_screen.dart';
 import 'package:flify/screens/home_screen.dart';
+import 'package:flify/screens/reconnect_screen.dart';
 import 'package:flify/types/navigation_state.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -13,10 +14,12 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => HomeScreen(
-          ip: (state.extra as HomeScreenState?)?.ip,
-          port: (state.extra as HomeScreenState?)?.port,
-          name: (state.extra as HomeScreenState?)?.name),
+      builder: (context, state) {
+        HomeScreenNavigationState? params =
+            state.extra as HomeScreenNavigationState?;
+        return HomeScreen(
+            ip: params?.ip, port: params?.port, name: params?.name);
+      },
     ),
     GoRoute(
       path: "/scanQR",
@@ -25,28 +28,41 @@ final router = GoRouter(
     GoRoute(
         path: "/connection",
         redirect: (context, state) {
-          if (state.queryParameters["ip"] == null ||
-              state.queryParameters['port'] == null ||
-              state.queryParameters['name'] == null) {
+          ConnectionScreenNavigationState? params =
+              state.extra as ConnectionScreenNavigationState?;
+          if (params == null) {
             return "/";
           }
           return null;
         },
         builder: (context, state) {
+          ConnectionScreenNavigationState params =
+              state.extra as ConnectionScreenNavigationState;
           return ConnectionScreen(
-            ip: state.queryParameters["ip"]!,
-            port: state.queryParameters["port"]!,
-            name: state.queryParameters["name"]!,
-          );
+              ip: params.ip!,
+              port: params.port!,
+              name: params.name!,
+              currentReconnectIndex: params.currentReconnectIndex);
         }),
     GoRoute(
         path: "/reconnect",
+        redirect: (context, state) {
+          ReconnectScreenNavigationState? params =
+              state.extra as ReconnectScreenNavigationState?;
+          if (params == null) {
+            return "/";
+          }
+          return null;
+        },
         builder: (context, state) {
-          return HomeScreen(
-              ip: state.queryParameters["ip"],
-              port: state.queryParameters["port"],
-              name: state.queryParameters["name"],
-              reconnect: true);
+          ReconnectScreenNavigationState params =
+              state.extra as ReconnectScreenNavigationState;
+
+          return ReconnectScreen(
+              ip: params.ip!,
+              port: params.port!,
+              name: params.name!,
+              currentReconnectIndex: params.currentReconnectIndex);
         })
   ],
 );

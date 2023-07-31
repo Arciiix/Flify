@@ -1,7 +1,10 @@
+import 'package:flify/screens/connection_screen.dart';
 import 'package:flify/utils/form_validation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:go_router/go_router.dart";
+
+import '../../types/navigation_state.dart';
 
 class ManualConnect extends StatefulWidget {
   final String? ip;
@@ -40,8 +43,12 @@ class _ManualConnectState extends State<ManualConnect> {
     if (!_form.currentState!.validate()) {
       return;
     }
-    context.push(
-        "/connection?ip=${_ipController.text}&port=${_portController.text}&name=${_nameController.text}");
+    context.push("/connection",
+        extra: ConnectionScreenNavigationState(
+          ip: _ipController.text,
+          port: _portController.text,
+          name: _nameController.text,
+        ));
   }
 
   @override

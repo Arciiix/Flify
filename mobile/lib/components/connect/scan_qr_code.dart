@@ -89,7 +89,8 @@ class _ScanQrCodeState extends State<ScanQrCode> {
                 // Success - navigate back with the data
                 // context.pop([ip, port, name]);
                 context.go("/",
-                    extra: HomeScreenState(ip: ip, port: port, name: name));
+                    extra: HomeScreenNavigationState(
+                        ip: ip, port: port, name: name));
               } else {
                 // Wrong format
                 if (!_isSnackbarActive) {

@@ -7,6 +7,7 @@ import 'package:flify/providers/network_info.dart';
 import 'package:flify/providers/notifications.dart';
 import 'package:flify/providers/recent_devices.dart';
 import 'package:flify/providers/socket.dart';
+import 'package:flify/types/navigation_state.dart';
 import 'package:flify/types/recent_device.dart';
 import 'package:flify/types/socket.dart';
 import 'package:flify/utils/form_validation.dart';
@@ -27,8 +28,15 @@ class ConnectionScreen extends ConsumerStatefulWidget {
   final String ip;
   final String port;
   final String name;
+  final int?
+      currentReconnectIndex; // If not 0, it will connect to the current data after a delay. Number of reconnections that already happened to the given device. Starts from 1 (0 = don't reconnect)
+
   const ConnectionScreen(
-      {super.key, required this.ip, required this.port, required this.name});
+      {super.key,
+      required this.ip,
+      required this.port,
+      required this.name,
+      this.currentReconnectIndex});
 
   @override
   ConnectionScreenState createState() => ConnectionScreenState();
@@ -54,6 +62,8 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
 
   late double selfVolume;
   late int batteryLevel;
+
+  int currentReconnectIndex = 0;
 
   DateTime lastHeartbeat = DateTime.fromMillisecondsSinceEpoch(0);
 
@@ -120,6 +130,16 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     });
   }
 
+  void reconnect(BuildContext c, {int? currentReconnectIndexOverride}) {
+    c.replace("/reconnect",
+        extra: ReconnectScreenNavigationState(
+            ip: widget.ip,
+            port: widget.port,
+            name: widget.name,
+            currentReconnectIndex:
+                currentReconnectIndexOverride ?? currentReconnectIndex + 1));
+  }
+
   void initSocketConnection(Metadata metadata) {
     // TODO: Think about migrating to HTTPS
     socket = IO.io('http://${widget.ip}:${widget.port}', <String, dynamic>{
@@ -179,6 +199,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
             ..channelCount = session['params']['channelCount']
             ..sampleRate = session['params']['sampleRate']);
         player = FlutterSoundPlayer();
+        currentReconnectIndex = 0;
       });
       print("INIT FINISH  ${_currentSession!.id}!");
 
@@ -239,8 +260,16 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     socket.on("reconnect", (_) {
       print("Reconnect");
       if (mounted) {
-        context.replace(
-            "/reconnect?ip=${widget.ip}&port=${widget.port}&name=${widget.name}");
+        reconnect(context, currentReconnectIndexOverride: 1);
+      }
+    });
+
+    socket.on("you_will_disconnect", (_) {
+      if (mounted) {
+        socket.disconnect();
+        context.replace("/",
+            extra: HomeScreenNavigationState(
+                ip: widget.ip, port: widget.port, name: widget.name));
       }
     });
 
@@ -253,6 +282,10 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         _loadingState = "Error: ${data?.toString() ?? "unknown"}";
         _isError = true;
       });
+
+      if (mounted) {
+        reconnect(context);
+      }
     });
     socket.onConnectTimeout((data) {
       if (!mounted) return;
@@ -263,15 +296,23 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
         _loadingState = "Error: connection timeout";
         _isError = true;
       });
+
+      if (mounted) {
+        reconnect(context);
+      }
     });
     socket.onDisconnect((data) {
       if (!mounted) return;
       if (_scaffoldKey.currentContext != null) {
         ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
             const SnackBar(content: Text("Disconnected from the server")));
-        _scaffoldKey.currentContext!.go(
-          "/",
-        );
+        // _scaffoldKey.currentContext!.go(
+        //   "/",
+        // );
+
+        if (mounted) {
+          reconnect(_scaffoldKey.currentContext!);
+        }
       }
     });
 
@@ -346,6 +387,7 @@ class ConnectionScreenState extends ConsumerState<ConnectionScreen> {
     localNotifications = ref.read(flutterLocalNotificationsProvider);
 
     remoteDeviceName = widget.name;
+    currentReconnectIndex = widget.currentReconnectIndex ?? 0;
 
     WidgetsBinding.instance.addPostFrameCallback((_) => initConnection());
   }

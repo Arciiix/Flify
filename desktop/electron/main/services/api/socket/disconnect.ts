@@ -8,7 +8,11 @@ export default function disconnectSocket(
   { socketId }: DisconnectSocketParams
 ): boolean {
   let potentialSocket = connectedSockets.find((e) => e.socketId === socketId);
-  potentialSocket?.socket?.disconnect();
+
+  potentialSocket?.socket?.emit("you_will_disconnect");
+  setTimeout(() => {
+    potentialSocket?.socket?.disconnect();
+  }, 1000);
 
   return !!potentialSocket; // Returns true if socket was found, otherwise false
 }
