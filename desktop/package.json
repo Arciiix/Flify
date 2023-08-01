@@ -21,7 +21,7 @@
   "dependencies": {
     "cuid": "^3.0.0",
     "dotenv": "^16.3.1",
-    "easy-volume": "^1.0.1",
+    "easy-volume": "^1.1.0",
     "electron-updater": "^5.3.0",
     "hazardous": "^0.3.0",
     "ip": "^1.1.8",
