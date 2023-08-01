@@ -1,5 +1,5 @@
 name: flify
-description: A new Flutter project.
+description: Stream PC audio or microphone to mobile easily, in the blink of an eye.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -49,6 +49,7 @@ dependencies:
   volume_controller: ^2.0.7
   battery_info: ^1.1.1
   rxdart: ^0.27.7
+  permission_handler: ^10.4.3
 
 dev_dependencies:
   flutter_test:

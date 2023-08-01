@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flify/types/recent_device.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,13 +21,16 @@ void main() async {
 
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   if (Platform.isAndroid) {
-    flutterLocalNotificationsPlugin
+    await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.requestPermission();
   }
-
   print("Notifications init");
+
+  // For getting network info
+  PermissionStatus locationStatus = await Permission.location.request();
+  print("location permissions: ${locationStatus.toString()}");
 
   runApp(ProviderScope(overrides: [
     isarProvider.overrideWithValue(db),
