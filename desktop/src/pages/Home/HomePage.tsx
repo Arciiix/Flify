@@ -10,6 +10,7 @@ import { sockets } from "@/state/connection/sockets.atom";
 import { Link, useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { MdOutlineSpeaker } from "react-icons/md";
+import { audioDevice } from "@/state/connection/audioDevice.atom";
 
 interface HomePageProps {
   alreadyConnected?: boolean;
@@ -21,6 +22,8 @@ export default function HomePage({ alreadyConnected }: HomePageProps) {
   const network = useRecoilValue(connection);
   const [text, setText] = useState<string | null>(null);
   const deviceList = useRecoilValue(sockets);
+
+  const currentAudioDevice = useRecoilValue(audioDevice);
 
   const getQRCodeText = async () => {
     const text = await getQRCodeData();
@@ -59,9 +62,15 @@ export default function HomePage({ alreadyConnected }: HomePageProps) {
           {/* TODO: Display audio info */}
           <div className="flex gap-1 items-center">
             <MdOutlineSpeaker size={16} />
-            <span className="text-sm">
-              Audio Device Name, x channels, 44100 Hz
-            </span>
+            {currentAudioDevice ? (
+              <span className="text-sm">
+                {currentAudioDevice.name}, {currentAudioDevice.maxInputChannels}{" "}
+                channel
+                {currentAudioDevice.maxInputChannels !== 1 ? "s" : ""},{" "}
+                {currentAudioDevice.defaultSampleRate} Hz,{" "}
+                {currentAudioDevice.hostAPIName}
+              </span>
+            ) : null}
           </div>
           {/* TODO: Maybe volume? */}
         </Link>
