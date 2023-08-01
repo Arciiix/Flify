@@ -16,6 +16,7 @@ import getAudioVolume from "../api/audio/getAudioVolume";
 import togglePlayback from "../api/playback/togglePlayback";
 import previousTrack from "../api/playback/previousTrack";
 import nextTrack from "../api/playback/nextTrack";
+import { join } from "path";
 
 export let connectedSockets: Client[] = [];
 
@@ -44,6 +45,7 @@ export default function handleSocketConnection(socket: Socket) {
     new Notification({
       title: "Device connected",
       body: `The device ${metadata.deviceName} has connected!`,
+      icon: join(process.env.PUBLIC, "icons", "android-chrome-192x192.png"),
     }).show();
 
     if (!connectedSockets.length) {
@@ -110,6 +112,7 @@ export default function handleSocketConnection(socket: Socket) {
     new Notification({
       title: "Device disconnected",
       body: `The device ${client?.metadata.deviceName} has disconnected!`,
+      icon: join(process.env.PUBLIC, "icons", "android-chrome-192x192.png"),
     }).show();
 
     // Remove the socket from connected sockets

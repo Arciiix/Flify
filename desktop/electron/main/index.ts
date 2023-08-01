@@ -116,6 +116,10 @@ app.on("activate", () => {
   }
 });
 
+if (process.platform === "win32") {
+  app.setAppUserModelId(app.name);
+}
+
 // New window example arg: new windows url
 ipcMain.handle("open-win", (_, arg) => {
   const childWindow = new BrowserWindow({
