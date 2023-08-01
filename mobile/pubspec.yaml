@@ -44,7 +44,6 @@ dependencies:
   socket_io_client: ^2.0.2
   device_info_plus: ^9.0.2
   flutter_riverpod: ^2.3.6
-  permission_handler: ^10.3.0
   flutter_sound: ^9.2.13
   flutter_local_notifications: ^15.1.0+1
   volume_controller: ^2.0.7
